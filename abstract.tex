@@ -1,0 +1,15 @@
+\begin{abstract}
+	Methods which are not covered by a project's test suite are
+	especially prone to exhibiting unexpected behaviours and being more
+	challenging to maintain over time. Some methods are untested but
+	have related implementations in sibling classes (sharing a common
+	superclass) that are tested. Our goal is to help developers improve
+	test suites by identifying such untested methods. We have
+	implemented a prototype tool, \textsc{SiblingClassTestDetector},
+	which accepts programs along with their test suites, and outputs a
+	set of Completable Candidates (CCs). We have applied our prototype
+	tool to 17 open-source benchmarks and identified 107 CCs within
+	these benchmarks. We have also manually produced two tests for
+	Completable Candidates and submitted Pull Requests for these
+	tests, one of which has been merged by developers.
+\end{abstract}
