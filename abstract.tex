@@ -1,7 +1,7 @@
 \begin{abstract}
 	Software dependencies are ubiquitous and may pose problems during testing, because creating usable objects from dependencies is often complicated.
-	Developers, therefore, often introduce mock objects to stand in for dependencies during testing. However, to our knowledge, no static analysis framework provides a tool to automatically identify mock objects created in the unit test cases. The lack of mock object detection may confuse static analyses, as they are unable to separate methods invoked on mock objects from methods invoked on actual objects. 
+	Developers, therefore, often introduce mock objects to stand in for dependencies during testing. However, to our knowledge, no static analysis framework provides a tool to automatically identify mock objects created in the unit test cases. The lack of mock object detection can decrease the precision of static analyses, as they are unable to separate methods invoked on mock objects from methods invoked on actual objects. 
 	
-	In this paper, we introduce MockDetector, a technique to identify mock objects. It is able to detect the common Java mocking libraries' API creating mock objects, where it checks if there is a call and then a def-use chain to the point of use. Understanding which objects are mock objects statically could help static analysis tools to identify which methods are  tested pre-compilation.
+	In this paper, we introduce MockDetector, a technique to identify mock objects. It is able to detect common Java mock libraries' APIs that create mock objects, checking whether there is a call to a mock creation site and then a def-use chain reaching the point of use. Implications of understanding which objects are mock objects include helping static analysis tools identify which dependencies' methods are actually tested, versus mock methods being called.
 	
 \end{abstract}
