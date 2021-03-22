@@ -1,15 +1,6 @@
 \begin{abstract}
-	Methods which are not covered by a project's test suite are
-	especially prone to exhibiting unexpected behaviours and being more
-	challenging to maintain over time. Some methods are untested but
-	have related implementations in sibling classes (sharing a common
-	superclass) that are tested. Our goal is to help developers improve
-	test suites by identifying such untested methods. We have
-	implemented a prototype tool, \textsc{SiblingClassTestDetector},
-	which accepts programs along with their test suites, and outputs a
-	set of Completable Candidates (CCs). We have applied our prototype
-	tool to 17 open-source benchmarks and identified 107 CCs within
-	these benchmarks. We have also manually produced two tests for
-	Completable Candidates and submitted Pull Requests for these
-	tests, one of which has been merged by developers.
+	When writing unit tests for Java artifacts with multiple dependencies, developers often introduce mock objects to mimic the dependencies' behaviour. Most Java static analysis frameworks, however, does not provide a tool to identify mock objects created in the unit test cases. The lack of mock object detection could misinterpret the test-to-code traceability, meaning the static analysis framework would mistakenly treat the method invoked by mock objects as the behaviour being tested in unit test cases. 
+	
+	In this paper, we introduce MockDetector, a technique to identify mock objects created within unit test cases. The tool is able to detect the common Java mocking libraries' API creating mock objects in a recursive manner. The collection of mock objects from the tool could later help static analysis tools identifying focal methods in unit tests with more precision.  
+	
 \end{abstract}
