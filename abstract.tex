@@ -1,6 +1,7 @@
 \begin{abstract}
-	When writing unit tests for Java artifacts with multiple dependencies, developers often introduce mock objects to mimic the dependencies' behaviour. Most Java static analysis frameworks, however, does not come with a tool to identify mock objects created in the unit test cases. The lack of mock object detection may confuse a static analysis framework, making it unable to separate the method invoked by mock objects from the method invoked by actual objects. 
+	Software dependencies are ubiquitous and may pose problems during testing, because creating usable objects from dependencies could be complicated.
+	Developers, therefore, often introduce mock objects to mimic the dependencies' behaviour during testing. Most Java static analysis frameworks, however, does not come with a tool to identify mock objects created in the unit test cases. The lack of mock object detection may confuse a static analysis framework, making it unable to separate the method invoked on mock objects from the method invoked on actual objects. 
 	
-	In this paper, we introduce MockDetector, a technique to identify mock objects created within unit test cases. The tool is able to detect the common Java mocking libraries' API creating mock objects. Understanding which objects are mock objects could help static analysis tools better identify focal methods in unit tests with more precision, where a focal method is the method whose behaviour is principally tested inside a test case.
+	In this paper, we introduce MockDetector, a technique to identify mock objects. The tool is able to detect the common Java mocking libraries' API creating mock objects. Understanding which objects are mock objects could help static analysis tools better identify focal methods in unit tests with more precision, where a focal method is the method whose behaviour is principally tested inside a test case.
 	
 \end{abstract}
