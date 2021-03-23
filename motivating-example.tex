@@ -1,0 +1,42 @@
+\section{motivating-example}
+
+\lstset{language=java,
+	keywordstyle=\color{blue}\bfseries,
+	commentstyle=\color{green},
+	stringstyle=\ttfamily\color{red!50!brown},
+	showstringspaces=false}‎
+\lstset{literate=%
+	*{0}{{{\color{red!20!violet}0}}}1
+	{1}{{{\color{red!20!violet}1}}}1
+	{2}{{{\color{red!20!violet}2}}}1
+	{3}{{{\color{red!20!violet}3}}}1
+	{4}{{{\color{red!20!violet}4}}}1
+	{5}{{{\color{red!20!violet}5}}}1
+	{6}{{{\color{red!20!violet}6}}}1
+	{7}{{{\color{red!20!violet}7}}}1
+	{8}{{{\color{red!20!violet}8}}}1
+	{9}{{{\color{red!20!violet}9}}}1
+}
+
+\begin{lstlisting}[basicstyle=\ttfamily, caption={This example illustrates a transitive call to EasyMock's \textit{CreateMock(java.lang.class)} function from test case \textit{testGetIterator()}.},
+basicstyle=\scriptsize\ttfamily,language = Java, framesep=4.5mm,
+framexleftmargin=1mm,,captionpos=b,label=lis:withZone]
+
+private Node[] createNodes() {
+	final Node node1 = createMock(Node.class);
+	final Node node2 = createMock(Node.class);
+	final Node node3 = createMock(Node.class);
+	final Node node4 = createMock(Node.class);
+	...
+}
+
+@Test
+public void testGetIterator() {
+	...
+	final Node[] nodes = createNodes();
+	...
+}
+
+
+
+\end{lstlisting}

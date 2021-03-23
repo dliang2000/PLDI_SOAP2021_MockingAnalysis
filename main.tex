@@ -23,7 +23,23 @@
 %%
 %% The first command in your LaTeX source must be the \documentclass command.
 \documentclass[sigconf]{acmart}
-
+\usepackage{todonotes}
+\usepackage{cite}
+\usepackage{booktabs} % For formal tables
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithm,algpseudocode}
+\usepackage{adjustbox}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\newcommand{\RomanNumeralCaps}[1]{\MakeUppercase{\romannumeral #1}}
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{amsmath, amsthm, amssymb, amsfonts}
+\usepackage{tikz}
+\usepackage{stfloats}
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -145,9 +161,9 @@
 
 \input{introduction}
 
-\input{approach}
+\input{motivating-example}
 
-\input{experiment}
+\input{technique}
 
 \input{evaluation}
 
