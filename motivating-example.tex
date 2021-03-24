@@ -3,7 +3,7 @@
 
 In this section, we illustrate how our \textsc{MockDetector} tool finds a mock object created within a unit test case. Our tool identifies variables which have been assigned an object flowing from a mock creation site through a def-use chain (possibly of length 0).
 
-We would like to discuss an example to illustrate our motivation for this project. Listing~\ref{lis:mockCall} illustrates a method \textit{addAll()} that is invoked on a mocked object of Type \textsc{Collection<Number>}. Current static analysis tools, to our knowledge, are unable to distinguish this method invocation on a mocked object from the method invocation on an actual object with call graph analysis. Therefore, the current tools would treat the method invocations on mocked objects as the behaviour getting tested, whereas the purpose of the method invocations on mocked objects are intended to make them fulfill the dependencies, so that the actual object's behaviour can be properly tested.
+First, we would like to discuss an example to illustrate our motivation for this project. Listing~\ref{lis:mockCall} illustrates a method \textit{addAll()} that is invoked on a mocked object of Type \textsc{Collection<Number>}. Current static analysis tools, to our knowledge, cannot easily distinguish this method invocation on a mocked object from the method invocation on an actual object. Therefore, a naive static analysis would perceive method invocations on mocked objects as the behaviour getting tested, whereas the purpose of the method invocations on mocked objects are intended model behaviours, so that the actual object's behaviour can be properly tested.
 
 Listing~\ref{lis:direct} shows the unit test case \textit{testSimpleResolution()} in the benchmark byte-buddy-dep (version 1.7.10) where the mock object \textsc{TypeDescription} is created via a direct call to Java mocking library Mockito's \textit{mock(java.lang.class)}. In this example, our \textsc{MockDetector} tool would utilizes Soot~\cite{Vallee-Rai:1999:SJB:781995.782008} to locate the statements that are instances of Assignment Statement with an invoke expression at the right operand, i.e. def-use chain of length 0. It then checks if the method invoked matches with any Java mocking libraries' APIs creating a mock object, by matching the method name, parameter types, and return type (i.e. the method subsignature).
 
@@ -27,17 +27,17 @@ Meanwhile, Listing~\ref{lis:transitive} illustrates the unit test case \textit{t
 	{9}{{{\color{red!20!violet}9}}}1
 }
 
-\begin{lstlisting}[basicstyle=\ttfamily, caption={This code snippet illustrates an example where the method is invoked on a mocked object in unit test case \textit{addAllForIterable())}},
+\begin{lstlisting}[basicstyle=\ttfamily, caption={This code snippet illustrates an example where a method is invoked on a mocked object in unit test case \textit{addAllForIterable()}},
 basicstyle=\scriptsize\ttfamily,language = Java, framesep=4.5mm,
 framexleftmargin=1mm,,captionpos=b,label=lis:mockCall]
 
 @Test
 public void addAllForIterable() {
-	...
-	final Collection<Number> c = createMock(Collection.class);
-	...
-	expect(c.addAll(inputCollection)).andReturn(true);
-	...
+// ...
+final Collection<Number> c = createMock(Collection.class);
+// ...
+expect(c.addAll(inputCollection)).andReturn(true);
+// ...
 }
 
 \end{lstlisting}
@@ -48,12 +48,12 @@ framexleftmargin=1mm,,captionpos=b,label=lis:direct]
 
 import static org.mockito.Mockito.mock;
 
-...
+// ...
 
 @Test
 public void testSimpleResolution() throws Exception {
-	TypeDescription typeDescription = mock(TypeDescription.class);
-	...
+TypeDescription typeDescription = mock(TypeDescription.class);
+// ...
 }
 
 \end{lstlisting}
@@ -63,15 +63,15 @@ basicstyle=\scriptsize\ttfamily,language = Java, framesep=4.5mm,
 framexleftmargin=1mm,,captionpos=b,label=lis:transitive]
 
 private Node[] createNodes() {
-	final Node node1 = createMock(Node.class);
-	...
+final Node node1 = createMock(Node.class);
+// ...
 }
 
 @Test
 public void testGetIterator() {
-	...
-	final Node[] nodes = createNodes();
-	...
+// ...
+final Node[] nodes = createNodes();
+// ...
 }
 
 \end{lstlisting}
