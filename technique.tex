@@ -1,1 +1,38 @@
 \section{Technique}
+\label{sec:technique}
+
+In this section, we describe the technique that \textsc{MockDetector} applies to find unit test cases with mock object created in the test body. Our tool tracks the sites and occurrences of the mock object  We separate the tracking and counting of the special case where mock objects created with def-use chain of length 0, from the general case where the def-use chain has length more than 0. We believe the study of immediate mock creation (i.e, def-use length of 0), as well as wrapper mock creation (i.e, def-use chain length more than 0), would provide additional insight of the benchmark.
+
+\subsection{Define Common Mocking Library APIs}
+\label{subsec:collection}
+
+Our tool stores a pool of common APIs that are used to create mock objects in popular Java mocking libraries, including Mockito, EasyMock, and PowerMock. These APIs are the possible mock creation sites, which are the candidates for def nodes in the def-use chain. They are defined as Enum types for the easy access by our analyzer. 
+
+\subsection{Determine the Mock Library}
+\label{subsec:library}
+
+With the pool of possible APIs to search for, our tool look into the Java benchmark for the Java mocking library it uses. 
+
+To enable the static analysis over the test suite classes, our tool first generates a driver class in the test suite to invoke all public, non-constructor test cases. Then it uses Soot to analyze the benchmark's test suite, treating the driver class as the main class, so that all test classes and their public, non-constructor test cases are analyzed. With the processed analysis information, our tool utilizes the Scene feature in Soot to find out the mocking library used by the benchmark.
+
+\begin{figure}
+	\centering
+	\input{immediateMock.tikz}
+	\caption{Illustration of the immediate mock (def-use chain of length 0) created in Listing~\ref{lis:direct}.} 
+	\label{fig:intermediate}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\input{wrapperMock.tikz}
+	\caption{Illustration of the wrapper mock (def-use chain of length 1) created in Listing~\ref{lis:transitive}.}
+	\label{fig:wrapper}
+\end{figure}
+
+\subsection{Find Intermediate Mocks}
+\label{subsec:intermediate}
+
+In this stage, our tool detects and counts unit test cases with a mock object created immediately. Refer to Listing~\ref{lis:direct}, the 
+
+\subsection{Find Wrapper Mocks}
+\label{subsec:wrapper}

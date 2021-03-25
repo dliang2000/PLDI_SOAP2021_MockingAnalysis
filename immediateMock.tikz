@@ -1,0 +1,20 @@
+\documentclass[tikz,border=5pt]{standalone}
+
+\tikzstyle{block} = [rectangle, draw,
+text width=3em, text centered, rounded corners, minimum height=2em]
+
+\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2cm,
+semithick,initial text=]
+
+\node[normal,block,text width=7em]   (A)              {START};
+
+\node[normal, xshift=-8em, yshift=-3em, text width=6em, text centered,rounded corners] (B) [below of=A] {\textit{typeDescription} =
+\textit{EasyMock.mock(TypeDescription.class)};
+
+\node[normal, xshift=10em, yshift=-3em, text width=6.3em, text centered,rounded corners] (C) [below of=B] {END};
+
+
+\draw (B) -> (A);
+\draw (C) -> (B);
+
+\end{tikzpicture}

@@ -1,0 +1,23 @@
+\documentclass{standalone}
+\begin{document}
+
+\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2cm,
+semithick,initial text=]
+
+\node[normal,block,text width=7em]   (A)              {START};
+
+\node[normal, xshift=-8em, yshift=-3em, text width=6em, text centered,rounded corners] (B) [below of=A] {\textit{nodes} =
+\textit{createNodes()};
+
+\node[normal, xshift=-8em, yshift=-3em, text width=6em, text centered,rounded corners] (C) [below of=B] {\textit{node1} =
+\textit{Mockito.createMock(Node.class)};
+
+\node[normal, xshift=10em, yshift=-3em, text width=6.3em, text centered,rounded corners] (D) [below of=C] {END};
+
+
+\draw (B) -> (A);
+\draw (C) -> (B);
+\draw (D) -> (C);
+
+\end{tikzpicture}
+\end{document}
