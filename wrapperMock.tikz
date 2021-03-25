@@ -1,4 +1,4 @@
-\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2cm,semithick,initial text=]
+\begin{tikzpicture}[>=stealth,shorten >=1pt,auto,node distance=2cm,semithick]
 
 \node[normal,block,text width=7em]   (A)              {START};
 
