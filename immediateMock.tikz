@@ -1,12 +1,11 @@
-
 \begin{tikzpicture}[>=stealth,shorten >=1pt,auto,node distance=2cm,semithick]
 
 \node[block,text width=7em]   (A)              {START};
 
-\node[xshift=-8em, yshift=-3em, text width=6em, text centered,rounded corners] (B) [below of=A] {\textit{typeDescription} =
-\textit{EasyMock.mock(TypeDescription.class)};
+\node[block, text width=15em, text centered,rounded corners] (B) [below of=A] {\textit{typeDescription} =
+\textit{EasyMock.mock(TypeDescription.class)}};
 
-\node[xshift=10em, yshift=-3em, text width=6.3em, text centered,rounded corners] (C) [below of=B] {END};
+\node[block, text width=6.3em, text centered,rounded corners] (C) [below of=B] {END};
 
 
 \draw (B) -> (A);

@@ -33,11 +33,11 @@ framexleftmargin=1mm,,captionpos=b,label=lis:mockCall]
 
 @Test
 public void addAllForIterable() {
-// ...
-final Collection<Number> c = createMock(Collection.class);
-// ...
-expect(c.addAll(inputCollection)).andReturn(true);
-// ...
+	// ...
+	final Collection<Number> c = createMock(Collection.class);
+	// ...
+	expect(c.addAll(inputCollection)).andReturn(true);
+	// ...
 }
 
 \end{lstlisting}
@@ -52,7 +52,8 @@ import static org.mockito.Mockito.mock;
 
 @Test
 public void testSimpleResolution() throws Exception {
-TypeDescription typeDescription = mock(TypeDescription.class);
+	TypeDescription typeDescription = 
+			mock(TypeDescription.class);
 // ...
 }
 
@@ -63,14 +64,14 @@ basicstyle=\scriptsize\ttfamily,language = Java, framesep=4.5mm,
 framexleftmargin=1mm,,captionpos=b,label=lis:transitive]
 
 private Node[] createNodes() {
-final Node node1 = createMock(Node.class);
+	final Node node1 = createMock(Node.class);
 // ...
 }
 
 @Test
 public void testGetIterator() {
 // ...
-final Node[] nodes = createNodes();
+	final Node[] nodes = createNodes();
 // ...
 }
 
