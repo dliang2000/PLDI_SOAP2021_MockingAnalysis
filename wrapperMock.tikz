@@ -1,18 +1,11 @@
-\begin{tikzpicture}[>=stealth,shorten >=1pt,auto,node distance=2cm,semithick]
+\begin{tikzpicture}[>=stealth,shorten >=1pt,auto,node distance=1.5cm,semithick]
 
-\node[block, text width=7em]   (A)              {START};
-
-\node[block, text width=6em, text centered,rounded corners] (B) [below of=A] {\textit{nodes} =
+\node[block, text width=6em, text centered,rounded corners] (A) {\textit{nodes} =
 \textit{createNodes()}};
 
-\node[block, text width=12em, text centered,rounded corners] (C) [below of=B] {\textit{node1} =
+\node[block, text width=12em, text centered,rounded corners] (B) [below of=A] {\textit{node1} =
 \textit{Mockito.createMock(Node.class)}};
 
-\node[block, text width=6.3em, text centered,rounded corners] (D) [below of=C] {END};
-
-
 \draw (B) -> (A);
-\draw (C) -> (B);
-\draw (D) -> (C);
 
 \end{tikzpicture}
