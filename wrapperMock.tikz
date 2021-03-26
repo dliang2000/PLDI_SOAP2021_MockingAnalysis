@@ -1,10 +1,10 @@
-\begin{tikzpicture}[>=stealth,shorten >=1pt,auto,node distance=1.5cm,semithick]
+\begin{tikzpicture}[>=stealth,shorten >=1pt,auto,node distance=2cm,semithick]
 
-\node[block, text width=6em, text centered,rounded corners] (A) {\textit{nodes} =
+\node[block, text width=6em, text centered, rounded corners] (A) {\textit{nodes} =
 \textit{createNodes()}};
 
-\node[block, text width=12em, text centered,rounded corners] (B) [below of=A] {\textit{node1} =
-\textit{Mockito.createMock(Node.class)}};
+\node[block, text width=12em, text centered, rounded corners] (B) [below of=A] {\textit{node1} =
+\textit{EasyMock.createMock(Node.class)} \\ \ldots \\ return Node[]\{node1, \ldots\}};
 
 \draw (B) -> (A);
 

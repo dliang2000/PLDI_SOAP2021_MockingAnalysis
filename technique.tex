@@ -11,14 +11,14 @@ Our tool stores a pool of common APIs that are used to create mock objects in po
 \subsection{Determine the Mock Library}
 \label{subsec:library}
 
-With the pool of possible APIs to search for, our tool look into the Java benchmark for the Java mocking library it uses. 
+With the pool of possible APIs to search for, our tool look into the Java benchmark for the Java mocking library it utilizes. 
 
-To enable the static analysis over the test suite classes, our tool first generates a driver class in the test suite to invoke all public, non-constructor test cases. Then it uses Soot to analyze the benchmark's test suite, treating the driver class as the main class, so that all test classes and their public, non-constructor test cases are analyzed. With the processed analysis information, our tool utilizes the Scene feature in Soot to find out the mocking library used by the benchmark.
+To enable the static analysis over the test suite classes, our tool first generates a driver class in the test suite to invoke all public, non-constructor test cases. Then it uses Soot to analyze the benchmark's test suite, treating the driver class as the main class, so that all test classes and their public, non-constructor test cases are analyzed. With the processed analysis information, our tool applies the Scene feature in Soot to find out the mocking library used by the benchmark.
 
 \begin{figure}
 	\centering
 	\input{immediateMock.tikz}
-	\caption{Illustration of the immediate mock (def-use chain of length 0) created in Listing~\ref{lis:direct}.} 
+	\caption{Illustration of the immediate mock (def-use chain of length 0) created in Listing~\ref{lis:direct}, where \textsc{X} represents \textsc{TypeDescription} class in the code.} 
 	\label{fig:immediate}
 \end{figure}
 
@@ -29,10 +29,16 @@ To enable the static analysis over the test suite classes, our tool first genera
 	\label{fig:wrapper}
 \end{figure}
 
-\subsection{Find Intermediate Mocks}
-\label{subsec:intermediate}
+\subsection{Find Immediate Mocks}
+\label{subsec:immediate}
 
-In this stage, our tool detects and counts unit test cases with a mock object created immediately. Refer to Listing~\ref{lis:direct}, the 
+In this stage, our tool detects and counts the unit test cases with at least one mock objects created immediately. With all the unit test cases processed in the previous step, our tool now retrieves the body for each unit test case, and look for statements similar to the one illustrated in Listing~\ref{lis:direct}, where it is an instance of assignment statement containing a invoke expression at the right hand side. Our tool would then determine if it matches with the determined mocking library's API. Refer to the example, the right operand of the assignment statement is a method invocation of \textit{Mockito.mock()}. After our tool examines the library and subsignature, it verifies that this unit test case contains a mock object created with def-use length of 0, which this path is depicted in Figure~\ref{fig:immediate}. 
+
 
 \subsection{Find Wrapper Mocks}
 \label{subsec:wrapper}
+
+Refer to Listing~\ref{lis:transitive}, our tool also considers the case where the mock object is created via a transitive call. Figure~\ref{fig:wrapper} presents the example's def-use path. It illustrates an array of mocked \textsc{Node} objects created in the helper function \textit{createNodes()}, which is an approximation of mock object creation that is considered within our tool's scope. 
+On top of the scheme finding immediate mocks, \textsc{MockDetector} implements Soot's \textsc{ReachableMethods} to find these wrapper mocks. With the determined mocking library's API taken as the end point, our tool could now tell if this end point is reachable by any statements in the test case, excluding the ones creating immediate mocks.
+The reason to differentiate the counting of wrapper mocks from the immediate mocks is that, we believe the analysis of these two separately could provide more insight of the benchmark, such as to obtain the percentage of mocks, or the mocks within certain modules created via a wrapper.
+
