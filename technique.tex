@@ -15,6 +15,8 @@ Given a pool of possible APIs to search for, our tool can analyze tests for thei
 
 JUnit tests are simply methods that developers write in test classes, suitably annotated (in JUnit 3 by method name, in 4+ by a @Test annotation). A JUnit test runner uses reflection to find tests. This is a problem for static analyses.
 
+WRITE SOMETHING ABOUT DRIVER GENERATION!!!
+
 Thus, to enable static analysis over the test suite classes, our tool first generates a driver class which invokes all public, non-constructor test cases. Then it uses Soot to analyze the benchmark's test suite, treating the driver class as the main class, so that all test classes and their public, non-constructor test cases are analyzed. Our tool loads all benchmark classes and queries Soot to find out which mocking library the benchmark uses, by checking for references to each of the common APIs.
 
 \begin{figure}
