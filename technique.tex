@@ -1,24 +1,26 @@
 \section{Technique}
 \label{sec:technique}
 
-In this section, we describe the technique that \textsc{MockDetector} applies to find unit test cases with mock object created in the test body. Our tool tracks the sites and occurrences of the mock object  We separate the tracking and counting of the special case where mock objects created with def-use chain of length 0, from the general case where the def-use chain has length more than 0. We believe the study of immediate mock creation (i.e, def-use length of 0), as well as wrapper mock creation (i.e, def-use chain length more than 0), would provide additional insight of the benchmark.
+In this section, we describe the technique that \textsc{MockDetector} applies to find unit test cases with mock objects created in the test body. Our tool tracks the sites and occurrences of the mock object  We separate the tracking and counting of the special case where mock objects created with def-use chain of length 0, from the general case where the def-use chain has length more than 0. We believe the study of immediate mock creation (i.e, def-use length of 0), as well as wrapper mock creation (i.e, def-use chain length more than 0), would provide additional insight of the benchmark. % what does the last sentence mean? What study are you proposing?
 
 \subsection{Define Common Mocking Library APIs}
 \label{subsec:collection}
 
-Our tool stores a pool of common APIs that are used to create mock objects in popular Java mocking libraries, including Mockito, EasyMock, and PowerMock. These APIs are the possible mock creation sites, which are the candidates for def nodes in the def-use chain. They are defined as Enum types for the easy access by our analyzer. 
+Our tool stores a pool of common APIs, provided by the analysis designer, which are used to create mock objects when using popular Java mocking libraries, including Mockito, EasyMock, and PowerMock. These APIs are the possible mock creation sites---the candidates for def nodes in the def-use chain. %They are defined as Enum types for easy access by our analyzer. last sentence is an implementation detail, not necessary
 
-\subsection{Determine the Mock Library}
+\subsection{Load all classes and Determine the Mock Library}
 \label{subsec:library}
 
-With the pool of possible APIs to search for, our tool look into the Java benchmark for the Java mocking library it utilizes. 
+Given a pool of possible APIs to search for, our tool can analyze tests for their uses of these APIs.%looks into the Java benchmark for the Java mocking library it utilizes. 
 
-To enable the static analysis over the test suite classes, our tool first generates a driver class in the test suite to invoke all public, non-constructor test cases. Then it uses Soot to analyze the benchmark's test suite, treating the driver class as the main class, so that all test classes and their public, non-constructor test cases are analyzed. With the processed analysis information, our tool applies the Scene feature in Soot to find out the mocking library used by the benchmark.
+JUnit tests are simply methods that developers write in test classes, suitably annotated (in JUnit 3 by method name, in 4+ by a @Test annotation). A JUnit test runner uses reflection to find tests. This is a problem for static analyses.
+
+Thus, to enable static analysis over the test suite classes, our tool first generates a driver class which invokes all public, non-constructor test cases. Then it uses Soot to analyze the benchmark's test suite, treating the driver class as the main class, so that all test classes and their public, non-constructor test cases are analyzed. Our tool loads all benchmark classes and queries Soot to find out which mocking library the benchmark uses, by checking for references to each of the common APIs.
 
 \begin{figure}
 	\centering
 	\input{immediateMock.tikz}
-	\caption{Illustration of the immediate mock (def-use chain of length 0) created in Listing~\ref{lis:direct}, where \textsc{X} represents \textsc{TypeDescription} class in the code.} 
+	\caption{Illustration of the immediate mock (def-use chain of length 0) created in Listing~\ref{lis:direct}. The actual benchmark from which this was drawn contains \textsc{TypeDescription} instead of  \textsc{X}.} 
 	\label{fig:immediate}
 \end{figure}
 
@@ -32,13 +34,23 @@ To enable the static analysis over the test suite classes, our tool first genera
 \subsection{Find Immediate Mocks}
 \label{subsec:immediate}
 
-In this stage, our tool detects and counts the unit test cases with at least one mock objects created immediately. With all the unit test cases processed in the previous step, our tool now retrieves the body for each unit test case, and look for statements similar to the one illustrated in Listing~\ref{lis:direct}, where it is an instance of assignment statement containing a invoke expression at the right hand side. Our tool would then determine if it matches with the determined mocking library's API. Refer to the example, the right operand of the assignment statement is a method invocation of \textit{Mockito.mock()}. After our tool examines the library and subsignature, it verifies that this unit test case contains a mock object created with def-use length of 0, which this path is depicted in Figure~\ref{fig:immediate}. 
+In this stage, our tool detects and counts the unit test cases which create at least one mock object directly (i.e. not transitively through method calls). With all the unit test cases processed in the previous step, our tool next retrieves the body for each unit test case, and looks for statements similar to the one illustrated in Listing~\ref{lis:direct}, i.e. instances of assignment statements containing a invoke expression on the right hand side. Our tool would then determine if it matches with the determined mocking library's API. In the example, the right operand (source) of the assignment statement is a method invocation of \textit{Mockito.mock()}. After our tool examines the library and method signature, it concludes that this unit test case contains a mock object created with def-use length of 0, as depicted in Figure~\ref{fig:immediate}. 
 
 
 \subsection{Find Wrapper Mocks}
 \label{subsec:wrapper}
 
-Refer to Listing~\ref{lis:transitive}, our tool also considers the case where the mock object is created via a transitive call. Figure~\ref{fig:wrapper} presents the example's def-use path. It illustrates an array of mocked \textsc{Node} objects created in the helper function \textit{createNodes()}, which is an approximation of mock object creation that is considered within our tool's scope. 
-On top of the scheme finding immediate mocks, \textsc{MockDetector} implements Soot's \textsc{ReachableMethods} to find these wrapper mocks. With the determined mocking library's API taken as the end point, our tool could now tell if this end point is reachable by any statements in the test case, excluding the ones creating immediate mocks.
+Our tool also handles the case where the mock object is created via a transitive call, as seen in Listing~\ref{lis:transitive}. Figure~\ref{fig:wrapper} presents the example's def-use path. It illustrates an array of mocked \textsc{Node} objects created in the helper function \textit{createNodes()}, which is an approximation of mock object creation that is considered within our tool's scope.
+
+% I don't understand the previous sentence.
+
+On top of the scheme finding immediate mocks, \textsc{MockDetector} uses Soot's \textsc{ReachableMethods} to find these wrapper mocks. With the determined mocking library's API taken as the end point, our tool could now tell if this end point is reachable by any statements in the test case, excluding the ones creating immediate mocks.
+
+% This doesn't actually say how this works... you don't need to explain reachablemethods but there is something you need to explain.
+
+% Also, what is the relaionship between the array of Nodes and the specific Node inside the array?
+
 The reason to differentiate the counting of wrapper mocks from the immediate mocks is that, we believe the analysis of these two separately could provide more insight of the benchmark, such as to obtain the percentage of mocks, or the mocks within certain modules created via a wrapper.
+
+% That sentence just above doesn't come with any support.
 

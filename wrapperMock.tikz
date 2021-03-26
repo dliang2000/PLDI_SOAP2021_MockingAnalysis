@@ -3,7 +3,7 @@
 \node[block, text width=6em, text centered, rounded corners] (A) {\textit{nodes} =
 \textit{createNodes()}};
 
-\node[block, text width=12em, text centered, rounded corners] (B) [below of=A] {\textit{node1} =
+\node[block, text width=20em, text centered, rounded corners] (B) [below of=A] {\textit{node1} =
 \textit{EasyMock.createMock(Node.class)} \\ \ldots \\ return Node[]\{node1, \ldots\}};
 
 \draw (B) -> (A);
