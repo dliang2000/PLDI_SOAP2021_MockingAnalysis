@@ -1,1 +1,276 @@
 \section{Evaluation}
+\label{sec:evaluation}
+
+We now quantitatively characterize the performance of our mock analysis implementations on a suite of popular open-source applications. We also provide evidence about the importance of mock invocations to test suites. Section~\ref{sec:focal} discusses an application of our analysis to focal method detection.
+
+\begin{table*}
+	\centering
+	\caption{Our suite of 8 open-source benchmarks (8000--117000 LOC) plus our microbenchmark. Soot and Doop analysis run-times.}
+	%	\begin{adjustbox}{width=0.1\textwidth}
+	\resizebox{.95\textwidth}{!}{\begin{tabular}{lrrrrrrr}
+			\toprule
+			Benchmark & Total LOC & Test LOC & \thead{Soot intraproc \\ total (s)} & \thead{Doop intraproc \\ total (s)} & \thead{Soot intraproc \\ mock analysis (s)}  & \thead{Doop intraproc \\ mock analysis (s)} & \thead{Doop interproc \\ mock analysis (s)} \\
+			\midrule
+			bootique-2.0.B1-bootique         &  15530   & 8595   & 58  & 2810  &  0.276   & 19.93  & 24.90    \\
+			commons-collections4-4.4         &  65273   & 36318  & 114 & 694   &  0.386   & 14.20  & 16.64     \\
+			flink-core-1.13.0-rc1            &  117310  & 49730  & 341 & 1847  &  0.415   & 27.21  & 62.12      \\
+			jsonschema2pojo-core-1.1.1       &  8233    & 2885   & 313 & 1005   &  0.282   & 29.33 & 41.05      \\
+			maven-core-3.8.1   		         &  38866   & 11104  & 183 & 588   &  0.276   & 19.49  & 23.42     \\
+			micro-benchmark         		 &  954     & 883	& 47  & 387   &  0.130   & 11.73   & 12.92     \\
+			mybatis-3.5.6         		  	 &  68268   & 46334  & 500 & 4477  &  0.662   & 59.83  & 192.16      \\
+			quartz-core-2.3.1        	  	 &  35355   & 8423   & 155 & 736   &  0.231   & 21.06  & 21.92   \\
+			vraptor-core-3.5.5         	  	 &  34244   & 20133  & 371 & 1469  &  0.455   & 34.95  & 149.38    \\
+			\bottomrule
+			Total         	  				 &  384033  & 184405 & 2082 & 14013 &  3.123  & 237.73  & 544.51    \\
+	\end{tabular}}
+	%	\end{adjustbox}
+	\label{tab:run-times}
+\end{table*}
+
+\begin{table*}
+	\centering
+	\caption{Counts of Test-Related (Test/Before/After) methods in public concrete test classes, along with counts of mocks, mock-containing arrays, and mock-containing collections, reported by Soot intraprocedural analysis.}
+	%	\begin{adjustbox}{width=0.1\textwidth}
+	\begin{tabular}{lrrrr}
+		\toprule
+		Benchmark & \thead{\# of Test-Related \\ Methods} & \thead{\# of Test-Related \\ Methods with \\ mocks (intra)}  & \thead{\# of Test-Related \\ Methods with \\ mock-containing\\ arrays (intra)} & \thead{\# of Test-Related \\ Methods with \\ mock-containing\\ collections (intra)} \\
+		\midrule
+		bootique-2.0.B1-bootique           		&  420        &  32  & 7 & 0       \\
+		commons-collections4-4.4          		&  1152       &  3   & 1 & 1       \\
+		flink-core-1.13.0-rc1           		&  1091       &  4   & 0 & 0       \\
+		jsonschema2pojo-core-1.1.1           	&  145        &  76  & 1 & 0       \\
+		maven-core-3.8.1	           			&  337        &  24  & 0 & 0       \\
+		micro-benchmark         		  		&  59         &  43  & 7 & 25       \\
+		mybatis-3.5.6         		  			&  1769       &  330 & 3 & 0       \\
+		
+		quartz-core-2.3.1         	  			&  218     	  &  7   & 0 & 0      \\
+		vraptor-core-3.5.5         	  			&  1119       &  565 & 15 & 0      \\
+		\bottomrule
+		Total        	  						&  6310       &  1084  & 34 & 26    \\
+	\end{tabular}
+	%	\end{adjustbox}
+	\label{tab:mocks}
+\end{table*}
+
+\begin{table*}
+	\centering
+	\caption{Comparison of Number of InstanceInvokeExprs on Mock objects analyzed by Soot and Doop, \hspace{\textwidth}and Total Number of InstanceInvokeExprs, in each benchmark's test suite.}
+	%	\begin{adjustbox}{width=0.1\textwidth}
+	\begin{tabular}{lrrrr}
+		\toprule
+		Benchmark & \thead{Total Number \\ of Invocations} & \thead{Mock Invokes \\ intraproc (Soot)}  & \thead{Context-insensitive, \\ intraproc (Doop)} &\thead{Context-insensitive, \\ interproc (Doop)} \\
+		\midrule
+		bootique-2.0.B1-bootique           		&  3366     &  99  & 99   & 122    \\
+		commons-collections4-4.4       			&  12753    &  11   &  3   & 23   \\
+		flink-core-1.13.0-rc1           		&  11923    &  40   & 40   & 1389   \\
+		jsonschema2pojo-core-1.1.1      	     	&  1896     &  276  & 282  & 604   \\
+		maven-core-3.8.1           			&  4072     &  23   & 23   & 39  \\
+		microbenchmark         		  		&  471      &  108  & 123  & 132   \\
+		mybatis-3.5.6         		  		&  19232    &  575  & 577  & 1345     \\
+		quartz-core-2.3.1       	  		&  3436     &  21   & 21   & 31    \\
+		vraptor-core-3.5.51        	  		&  5868     &  942  & 962  & 1630   \\
+		\bottomrule
+		Total        	  				&  63017    & 2095  & 2130  & 5315   \\
+	\end{tabular}
+	%	\end{adjustbox}
+	\label{tab:invokes}
+\end{table*}
+
+\begin{table*}
+	\centering
+	\caption{Counts of Field Mock Objects defined via \protect \texttt{@Mock} annotation, \hspace{\textwidth} in the constructors, and in \texttt{@Before} methods, in each benchmark's test suite.}
+	%	\begin{adjustbox}{width=0.1\textwidth}
+	\vspace*{.5em}
+	\resizebox{1.3\columnwidth}{!}{
+		\begin{tabular}{lrrrr}
+			\toprule
+			Benchmark & \thead{\# of Annotated \\ Field Mock Objects} & \thead{\# of Field Mock Objects \\ defined in the \texttt{<init>} constructor}  & \thead{\# of Field Mock Objects \\ defined in @Before methods} \\
+			\midrule
+			bootique-2.0.B1-bootique           		&  0        &  0    & 8        \\
+			commons-collections4-4.4          		&  0        &  0    & 0        \\
+			flink-core-1.13.0-rc1           		&  0        &  0    & 0        \\
+			jsonschema2pojo-core-1.1.1           	&  26       &  126  & 0        \\
+			maven-core-3.8.1	           			&  7        &  0    & 1        \\
+			micro-benchmark         		  		&  2        &  0    & 29        \\
+			mybatis-3.5.6         		  			&  41       &  0    & 0        \\
+			quartz-core-2.3.1         	  			&  0     	&  0    & 0      \\
+			vraptor-core-3.5.5         	  			&  263      &  128  & 83       \\
+			\bottomrule
+		\end{tabular}
+	}
+	%	\end{adjustbox}
+	\label{tab:field-mocks}
+\end{table*}
+
+%\begin{table*}
+%	\centering
+%	\caption{Doop analysis-only run-time after basic-only and context-insensitive base analyses. N/A = timed out after 90 minutes.}
+%	%	\begin{adjustbox}{width=0.1\textwidth}
+%	\begin{tabular}{lrrrrrr}
+%		\toprule
+%		Benchmark & \thead{Basic-only, \\ intraproc (s)} & \thead{Context-insensitive, \\ intraproc (s)} & \thead{Basic-only, \\ interproc (s)}  & \thead{Context-insensitive, \\ interproc (s)}  \\
+%		\midrule
+%		bootique-2.0.B1-bootique           		& 15.71  & 16.81 &  24.26    &  20.20     \\
+%		commons-collections4-4.4           		& 17.42  & 12.26 &  21.79    &  15.36        \\
+%		flink-core-1.13.0-rc1           		& 24.67  & 25.30 &  71.67    &  66.10         \\
+%		jsonschema2pojo-core-1.1.1         		& 25.98  & 26.27 &  42.14    &  39.21         \\
+%		maven-core-3.8.1   		        	& 18.01  & 16.34 &  25.49    &  22.09          \\
+%		micro-benchmark         			& 10.97  & 10.50 &  12.51    &  12.53        \\
+%		mybatis-3.5.6         		  		&  N/A   & 51.25 &   N/A     & 183.86          \\
+%		quartz-core-2.3.1        	  		& 17.72  & 19.83 &  22.99    &  21.14        \\
+%		vraptor-core-3.5.5         	  		& 22.10  & 23.81 &  66.73    & 146.09       \\
+%		\bottomrule
+%	\end{tabular}
+%	%	\end{adjustbox}
+%	\label{tab:doop-runtimes}
+%\end{table*}
+
+\begin{table*}
+	\centering
+	\caption{Comparison of Statement Coverage and Branch Coverage with all test cases, \hspace{\textwidth} and with test cases excluding intraprocedural mock invocations.}
+	\vspace*{.5em}
+	\begin{tabular}{lrrrrr} \toprule
+		& \multicolumn{2}{c}{Statement Coverage} & & \multicolumn{2}{c}{Branch Coverage} \\
+		\cmidrule{2-3} \cmidrule{5-6}
+		\thead{Benchmark} & \thead{All Test Cases} & \thead{Test Cases without \\ Intraproc Mocks} & & \thead{All Test Cases} & \thead{Test Cases without \\ Intraproc Mocks} \\ 
+		\midrule
+		
+		jsonschema2pojo-core-1.1.1  & 37\%  & 24\% & & 33\%    &  19\%     \\
+		maven-core-3.8.1   		    & 48\%  & 48\% & & 39\%    &  38\%       \\
+		mybatis-3.5.6   		    & 85\%  & 81\% & &  82\%    &  76\%        \\
+		vraptor-core-3.5.5         	& 87\%  & 59\% & & 81\%   &  56\%    \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:test-coverages}
+\end{table*}
+
+
+%\begin{table*}
+%	\centering
+%	\caption{Counts of mock invocations for Doop in basic-only and context-insensitive options, and for interprocedural and intraprocedural .}
+%	%	\begin{adjustbox}{width=0.1\textwidth}
+%	\begin{tabular}{lrrrr}
+%		\toprule
+%		Benchmark & \thead{Basic-only, \\ intraproc} & \thead{Context-insensitive, \\ intraproc} & \thead{Basic-only, \\ interproc} & \thead{Context-insensitive, \\ interproc} \\
+%		\midrule
+%		bootique-2.0.B1-bootique           		&    &    &   &       \\
+%		commons-collections4-4.4           		&    &    &   &        \\
+%		flink-core-1.13.0-rc1           		&    &    &   &         \\
+%		jsonschema2pojo-core-1.1.1         		&    &    &   &          \\
+%		maven-core-3.8.1   		           		&    &    &   &           \\
+%		micro-benchmark         		  		&    & 	  &   &           \\
+%		mybatis-3.5.6         		  			&    &    &   &          \\
+%		quartz-core-2.3.1        	  			&    &    &   &         \\
+%		vraptor-core-3.5.5         	  			&    &    &   &         \\
+%		\bottomrule
+%		Total         	  						&    &    &   &         \\
+%	\end{tabular}
+%	%	\end{adjustbox}
+%	\label{tab:doop-mock-invokes}
+%\end{table*}
+
+%% The goal of our study is to correctly identify and trace mock objects as well as the method invocations in the test suite. To this end, we conduct quantitative and qualitative research focusing on two research questions:
+
+%% \begin{quote}
+%% 	\emph{RQ 1: Are the mocks correctly identified and traced for each test method?}
+%% \end{quote}
+
+%% \begin{quote}
+%% 	\emph{RQ 2: Would this be helpful for existing static analysis tools?}
+%% \end{quote}
+
+
+We evaluated \textsc{MockDetector} on 8 open-source benchmarks, along with a micro-benchmark we developed to test our tool. We ran our experiments on a 32-core Intel(R) Xeon(R) CPU E5-4620 v2 at 2.60GHz with 128GB of RAM running Ubuntu 16.04.7 LTS.
+
+Table~\ref{tab:run-times} presents summary information about our benchmarks and run-times---the LOC and Soot and Doop analysis run-times for each benchmark. The 9 benchmarks include over 383 kLOC, with 184 kLOC in the test suites, per SLOCCount\footnote{\url{https://dwheeler.com/sloccount/}}.  Our benchmarks are from different domains and created by different groups of developers. The Soot total time is the amount of time that it takes for Soot to analyze the benchmark and test suite in whole-program mode, including our analyses. The Soot intraprocedural analysis time is the sum of run-times for the main analysis plus two pre-analyses (Section~\ref{subsec:soot}). The reported Doop run-time is from the context-insensitive analysis, while the Doop analysis time for intraprocedural and interprocedural mock invocation analyses are for running the analysis alone based on recorded facts from the benchmark. The total Doop run-time is much slower than the total Soot run-time because Doop always computes a callgraph---an expensive operation. The Doop analysis-only time is also slower than the Soot time; Doop computes a solution over the entire program, while Soot works one method at a time.
+%The major difference between the Doop's total run-time and the actual time spent on mock invocation analysis comes from the build of the complete graph. %Add reference for SLOCCount.
+
+We next investigated mock prevalence. Table~\ref{tab:mocks} presents the number of test-related (Test/Before/After) methods which contain local variables or which access fields that are mocks, mock-containing arrays, or mock-containing collections, as reported by our Soot-based intraprocedural analysis. 
+
+\begin{mdframed}[
+	leftmargin=\parindent,
+	rightmargin=\parindent,
+	skipabove=\topsep,
+	skipbelow=\topsep
+	]
+	{\bf Finding 1:} Across the 8 benchmarks, test-related methods containing local/field mocks or mock-containing containers accounted for 0.35\% to 51.8\% of the total number of test-related methods found in public concrete test classes.
+\end{mdframed}
+
+Of our benchmarks, 3 show very little mock use, while 2 show extensive use, with the remainder in between. Benchmarks \textsc{vraptor-core} and \textsc{jsonschema2pojo-core} have more than half of their test-related methods containing mock objects (and mock-containing arrays); in both of these, most field mocks are created via annotations and reused in multiple test cases in the same class. The difference in mock usage reflects their different philosophies and constraints regarding the creation and usage of mock objects in tests.
+
+Table~\ref{tab:invokes} is the core result about our mock analyses. It presents the detected number of method invocations on mocks. We include numbers from the imperative intraprocedural Soot implementation, as well as intraprocedural and interprocedural versions of the declarative Doop implementation.
+
+\begin{mdframed}[
+	leftmargin=\parindent,
+	rightmargin=\parindent,
+	skipabove=\topsep,
+	skipbelow=\topsep
+	]
+	{\bf Finding 2:} Our intraprocedural analysis finds that method calls on mock objects account for 0.086\% to 16.4\% of the total number of calls. 
+\end{mdframed}
+
+%--- discuss the numbers for the interprocedural analysis.
+
+In Section~\ref{sec:common} we discussed the implementation of our intraprocedural and interprocedural analyses. We can now discuss the effects of these implementation choices on the experimental results. Recall that we chose, unsoundly, to not propagate any information across method calls in the intraprocedural analysis. Thus, the intraproc columns in Table~\ref{tab:invokes} show smaller numbers than the interproc columns, as expected. The minor difference in \textsc{vraptor-core} is due to one method (which ought to be present) not showing up in Doop's context-insensitive callgraph. Note also that there is a sometimes drastic increase from the intraprocedural to the interprocedural result, e.g. from 40 to 1300 for \textsc{flink}. This is because mocks can propagate from tests to the methods that they call and all around the main program code. It would be desirable to be able to differentiate test helper methods, which we want to propagate mocks to, from methods in the main program, which we generally do not want to propagate mocks to; however, Doop treats test and main code identically.
+
+\begin{mdframed}[
+	leftmargin=\parindent,
+	rightmargin=\parindent,
+	skipabove=\topsep,
+	skipbelow=\topsep
+	]
+	{\bf Finding 3:} Interprocedural analysis finds from 1.07$\times$ to 34$\times$ more mock invocations than intraprocedural analysis, but that number includes potential mock calls in the main program.
+\end{mdframed}
+
+We have successfully executed our Doop analysis with different base (pointer) analyses. We reported numbers for the context-insensitive base analysis here as it matches our own mock analysis. (It would also be possible, with much more effort, to adapt our analysis to carry around context.)
+
+\paragraph{Validation} Our mock analysis could be subject to false positives (reported mocks that aren't) or false negatives (unreported mocks). As mentioned previously, we've cross-checked the results between the two implementations, reducing the likelihood of false positives. We observed false negatives in the Soot implementation, due to missing support for array-/collection-related functions. Both implementations are arguably subject to false negatives when subjects build their own mocks; those are more likely to be stubs or fakes than true mocks~\cite{fowler07:_mocks_arent_stubs}. Other types of false negatives are hard to detect.
+
+\paragraph{Field Mocks Results} We perform an evaluation on the necessity of our pre-analyses finding field mocks. 
+Table~\ref{tab:field-mocks} displays the number of field mock objects that are defined via \texttt{@Mock} annotations, in the constructors, and in the \texttt{@Before}/\texttt{setUp()} methods, respectively. 
+
+We focus on the 5 benchmarks that have defined field mock objects. 
+%They are \textsc{bootique}, \textsc{maven-core}, \textsc{jsonschema2pojo-core}, \textsc{mybatis}, and \textsc{vraptor-core}. 
+Among these benchmarks, \textsc{jsonschema2pojo-core}, \textsc{mybatis}, and \textsc{vraptor-core} have a high number (565) or a high percentage (over 50\%) of test-related methods containing mock objects, with many intraprocedural mock invokes. From the results in Table~\ref{tab:field-mocks}, we can tell these benchmarks also define field mock objects instead of repetitively creating the same mock objects in each test, reducing the need for code maintenance. In addition, although \textsc{bootique} and \textsc{maven-core} have lower number of tests using mock objects, these benchmarks still define field mocks. 
+
+\begin{mdframed}[
+	leftmargin=\parindent,
+	rightmargin=\parindent,
+	skipabove=\topsep,
+	skipbelow=\topsep
+	]
+	{\bf Finding 4:} More than half (5/8) of our benchmarks define field mock objects in their tests.
+\end{mdframed}
+We can deduce that our pre-analysis for field mocks described in Section~\ref{subsubsec:pre-analysis} is required for analyzing mocks in  test suites.
+
+\paragraph{Application: Mocks are important} Since our mock analysis identifies mock objects, we are in a position to empirically evaluate the importance of mock objects in our benchmarks' test suites. One measure of their importance is how much they contribute to code coverage. Using jacoco with the surefire Maven plugin, we measured branch and statement coverage for 4 of our benchmarks, both with and without test cases that contain mock invocations. We excluded mocks by generating custom Maven test execution commandlines. 
+
+Table~\ref{tab:test-coverages} presents our results. We can see that for benchmarks \textsc{jsonschema2pojo-core} and \textsc{vraptor-core}, which have about 15\% mock invocations, coverage drops by over 13 to 28 percentage points when excluding mocks. The fact that a correlation exists may be unsurprising, but the magnitude of the 28 point gap for \textsc{vraptor-core} is striking, and points out that the mock objects are pulling more than their weight in terms of coverage. Note that our analysis, or a dynamic version thereof, is required to collect these numbers. 
+
+\begin{mdframed}[
+	leftmargin=\parindent,
+	rightmargin=\parindent,
+	skipabove=\topsep,
+	skipbelow=\topsep
+	]
+	{\bf Finding 5:} Test suites use mocks to increase statement coverage by 13--28\% versus not using mocks.
+\end{mdframed}
+
+%--- , indicates the removal of mock invocations from call graph would improve the call graph's accuracy on method coverage for the benchmarks on the high end of the mock invocation percentage. 
+
+%We explored the performance of our 4 declarative analysis variants based on recorded program facts, and present the numbers in Table~\ref{tab:doop-run-times}. We can observe that the number of mock invocations correlates with the run-time; taking a bit more effort to compute a better call graph may well pay off in terms of overall analysis time. We suspect that the interprocedural analysis is especially slow for mybatis because we also analyze its 50 dependencies; that count is at the high end among our benchmarks.
+
+
+%% \subsection{Application}
+%% \label{subsec:static}
+
+%% There are more test cases holding interprocedural mocks (i.e., the mock object is created in a helper method and passed into the test case) in commons-collections and micro-benchmark. The interprocedural analysis is currently in development and will be discussed in Section~\ref{sec:discussion}.
+
+%% The Procedure Summaries produced after the analysis has indicated that the tracing of "mockiness" of variables and containers is also correct through the whole program. 
+
+%% The accuracy results in tracing intraprocedural mock objects or containers have indicated that \textsc{MockDetector} has the potential to be applied as a helper for existing static analysis tools. By adding proper adjustment, it could pass the mock information to the static analysis, so that the generated call graph may appropriately omit the methods invoked on mock objects, thus increasing its accuracy.
+
+%% By running evaluation (also interprocedurally) on more benchmarks, our tool would have the potential to finding the scenario where developers prefer using mock objects for dependencies, and subsequently providing mock suggestions.
+
+
+%% context-sensitivity for analysis

@@ -23,9 +23,10 @@
 %%
 %% The first command in your LaTeX source must be the \documentclass command.
 \documentclass[sigconf]{acmart}
+\usepackage{mdframed}
 \usepackage{todonotes}
-\usepackage{booktabs} % For formal tables
-%\usepackage{amsmath,amssymb,amsfonts}
+%\usepackage{cite}
+\usepackage{array, booktabs, makecell} % For formal tables
 \usepackage{algorithm,algpseudocode}
 \usepackage{adjustbox}
 \usepackage{graphicx}
@@ -36,12 +37,13 @@
 \newcommand{\RomanNumeralCaps}[1]{\MakeUppercase{\romannumeral #1}}
 \usepackage{url}
 \usepackage{enumitem}
-%\usepackage{amsmath, amsthm, amssymb, amsfonts}
-\usepackage{standalone}
+\usepackage{amsmath, amsthm, amssymb, amsfonts}
 \usepackage{tikz}
 \usepackage{stfloats}
-\usetikzlibrary{arrows.meta}
-\tikzstyle{block} = [rectangle, draw, text width=3em, text centered, rounded corners, minimum height=2em]
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}
+
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -154,7 +156,7 @@
 %%
 %% Keywords. The author(s) should pick words that accurately describe
 %% the work being presented. Separate the keywords with commas.
-\keywords{static analysis, mock objects, unit tests}
+\keywords{Static Analysis, Dataflow Analysis, Declarative Program Analysis, Mock Objects, Unit Tests}
 
 %%
 %% This command processes the author and affiliation and title
@@ -165,13 +167,23 @@
 
 \input{motivating-example}
 
+\input{applications}
+
 \input{technique}
 
 \input{evaluation}
 
+\input{focal}
+
 \input{related}
 
 \input{conclusion}
+
+\section*{Acknowledgements} We thank the Doop developers for their timely and helpful answers to our questions; developer or community support is necessary to successfully use Doop (or any research-grade program analysis framework, including Soot.)
+We also thank M. Ghafari for his timely response and for access to his focal method results. 
+
+\bibliographystyle{acm}
+\bibliography{bibliography}
 
 \end{document}
 \endinput
