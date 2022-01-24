@@ -56,6 +56,13 @@ we needed to know which call was to the focal method of a test---we
 wanted to create additional tests based on those focal methods, but
 not based on mock objects.
 
+\paragraph{Mutation testing}
+Code coverage metrics are well established in the software industry. These coverage metrics alone, however, may be insuffient to prove test quality since executing lines does not provide any insight about proper testing and use-case completeness.
+
+Mutation testing is a promising technique often used to identify defects in programs. Each mutant is an altered version of the program with some changes in the code and aims to cause some tests fail. Defects can be identified from surviving mutants (meaning all test cases passed under the mutant). Petrovic et al~\cite{Petrovic:mutation_testing} provide evidence that surviving mutants are effective to give actionable test goals.
+
+Identifying mock objects and mock calls in test suite could be helpful to better understand test cases containing mocks to kill the surviving mutants. It would be easy if you could alter some attributes to the mock objects that kills mutants.  Killing mutants by modifying the mock part of the tests and by modifying the non-mock part of the tests has different affordances, and we believe it worth some investigation for each approach.
+
 \paragraph{Extracting API usage examples}
 Finally, mock objects can serve as even more concise API usage
 examples for the objects being mocked (compared to the test as a whole);
