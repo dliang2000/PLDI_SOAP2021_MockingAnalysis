@@ -224,7 +224,7 @@ In Section~\ref{sec:common} we discussed the implementation of our intraprocedur
 
 We have successfully executed our Doop analysis with different base (pointer) analyses. We reported numbers for the context-insensitive base analysis here as it matches our own mock analysis. (It would also be possible, with much more effort, to adapt our analysis to carry around context.)
 
-\paragraph{Validation} Our mock analysis could be subject to false positives (reported mocks that aren't) or false negatives (unreported mocks). As mentioned previously, we've cross-checked the results between the two implementations, reducing the likelihood of false positives. We observed false negatives in the Soot implementation, due to missing support for array-/collection-related functions. Both implementations are arguably subject to false negatives when subjects build their own mocks; those are more likely to be stubs or fakes than true mocks~\cite{fowler07:_mocks_arent_stubs}. Other types of false negatives are hard to detect.
+\paragraph{Cross-Validation} Our mock analysis could be subject to false positives (reported mocks that aren't) or false negatives (unreported mocks). As mentioned previously, we've cross-checked the results between the two implementations, reducing the likelihood of false positives. We observed false negatives in the Soot implementation, due to missing support for certain array-/collection-related functions. Both implementations are arguably subject to false negatives when subjects build their own mocks; those are more likely to be stubs or fakes than true mocks~\cite{fowler07:_mocks_arent_stubs}. Other types of false negatives are hard to detect.
 
 %\paragraph{Field Mocks Results} We perform an evaluation on the necessity of our pre-analyses finding field mocks. 
 %Table~\ref{tab:field-mocks} displays the number of field mock objects that are defined via \texttt{@Mock} annotations, in the constructors, and in the \texttt{@Before}/\texttt{setUp()} methods, respectively. 
@@ -243,9 +243,9 @@ We have successfully executed our Doop analysis with different base (pointer) an
 %\end{mdframed}
 %We can deduce that our pre-analysis for field mocks described in Section~\ref{subsubsec:pre-analysis} is required for analyzing mocks in  test suites.
 
-\paragraph{Application: Mocks are important} Since our mock analysis identifies mock objects, we are in a position to empirically evaluate the importance of mock objects in our benchmarks' test suites. One measure of their importance is how much they contribute to code coverage. Using jacoco with the surefire Maven plugin, we measured branch and statement coverage for 4 of our benchmarks, both with and without test cases that contain mock invocations. We excluded mocks by generating custom Maven test execution commandlines. 
+\paragraph{Application: Mocks are important} Since our mock analysis identifies mock objects, we are in a position to empirically evaluate the importance of mock objects in our benchmarks' test suites. One measure of their importance is how much they contribute to code coverage. Using jacoco with the surefire Maven plugin, we measured branch and statement coverage for 4 of our benchmarks, both with and without test cases that contain intraprocedural mock invocations. We excluded intraprocedural mocks by generating custom Maven test execution commandlines.
 
-Table~\ref{tab:test-coverages} presents our results. We can see that for benchmarks \textsc{jsonschema2pojo-core} and \textsc{vraptor-core}, which have about 15\% mock invocations, coverage drops by over 13 to 28 percentage points when excluding mocks. The fact that a correlation exists may be unsurprising, but the magnitude of the 28 point gap for \textsc{vraptor-core} is striking, and points out that the mock objects are pulling more than their weight in terms of coverage. Note that our analysis, or a dynamic version thereof, is required to collect these numbers. 
+Table~\ref{tab:test-coverages} presents our results. We can see that for benchmarks \textsc{jsonschema2pojo-core} and \textsc{vraptor-core}, which have about 15\% mock invocations, statement coverage drops by over 13 to 28 percentage points when excluding intraprocedural mocks. The fact that a correlation exists may be unsurprising, but the magnitude of the 28 point gap of statement coverage for \textsc{vraptor-core} is striking, and points out that the mock objects are pulling more than their weight in terms of coverage. These coverage numbers suggest that mock objects may play a big role in test suites, and correctly tracing mock objects and invocations could provide better insight for the benchmarks rely on mock objects for testing. Note that our analysis, or a dynamic version thereof, is required to collect these numbers.
 
 \begin{mdframed}[
 	leftmargin=\parindent,
@@ -253,7 +253,7 @@ Table~\ref{tab:test-coverages} presents our results. We can see that for benchma
 	skipabove=\topsep,
 	skipbelow=\topsep
 	]
-	{\bf Finding 5:} Test suites use mocks to increase statement coverage by 13--28\% versus not using mocks.
+	{\bf Finding 4:} Test suites use mocks to increase statement coverage by 13--28\% versus not using mocks.
 \end{mdframed}
 
 %--- , indicates the removal of mock invocations from call graph would improve the call graph's accuracy on method coverage for the benchmarks on the high end of the mock invocation percentage. 
