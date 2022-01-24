@@ -87,3 +87,6 @@ As for the heuristic for methods2test, method \texttt{getToolChainsForType()} do
   \caption{Example: removing mock invocation from focal method consideration.}
   \label{fig:mockExampleEvaluation}
 \end{figure}
+
+\paragraph{Internal and External Mock Objects} 
+We should recognize that there are two types of objects that may be mocked in test cases: internal objects (defined within the project) and external objects (defined elsewhere). Developers should add tests for the behavior of internally-mocked objects. For example, the behavior of \texttt{session.getRequest()} in Figure~\ref{fig:mockExampleEvaluation} should be tested elsewhere. This could easily be pointed out to developers after \textsc{MockDetector} correctly identifying \texttt{session} as a mock. Future work may be necessary to distinguish internal mocks from external mocks.
