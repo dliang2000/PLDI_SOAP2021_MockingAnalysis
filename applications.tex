@@ -57,11 +57,9 @@ wanted to create additional tests based on those focal methods, but
 not based on mock objects.
 
 \paragraph{Mutation testing}
-Code coverage metrics are well established in the software industry. These coverage metrics alone, however, may be insuffient to prove test quality since executing lines does not provide any insight about proper testing and use-case completeness.
+Although code coverage metrics are well established, they are most useful in highlighting what is not covered in testing, and not strongly correlated with test suite effectiveness~\cite{inozemtseva14:_cover_not_stron_correl_test_suite_effec}. Mutation testing has been gaining popularity in practice~\cite{petrovic55:_pract_mutat_testin_scale,beller2021use}. The idea is to generate mutants---altered version of a program which presumably have incorrect behaviour. The task of the developer is then to create improved tests that kill mutants by distinguishing between the original program and the mutant. Mutants can thus incite developers to improve their test suites, and Petrovi\'c et al~\cite{Petrovic:mutation_testing} provide evidence that mutation testing does so.
 
-Mutation testing is a promising technique often used to identify defects in programs. Each mutant is an altered version of the program with some changes in the code and aims to cause some tests fail. Defects can be identified from surviving mutants (meaning all test cases passed under the mutant). Petrovic et al~\cite{Petrovic:mutation_testing} provide evidence that surviving mutants are effective to give actionable test goals.
-
-Identifying mock objects and mock calls in test suite could be helpful to better understand test cases containing mocks to kill the surviving mutants. It would be easy if you could alter some attributes to the mock objects that kills mutants.  Killing mutants by modifying the mock part of the tests and by modifying the non-mock part of the tests has different affordances, and we believe it worth some investigation for each approach.
+We anticipate that mock analysis can help developers use mutation testing as follows. Given a mutant to kill, the developer can also be told about existing test cases that exercise the changed code in the mutant. Changing the behaviour of test cases that use mocks can sometimes be easier than those that don't (it is easy to manipulate values coming back from mocks), and developers can focus on those testcases.
 
 \paragraph{Extracting API usage examples}
 Finally, mock objects can serve as even more concise API usage
