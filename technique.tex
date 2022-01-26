@@ -292,9 +292,14 @@ Call graphs are useful to our intraprocedural analysis because they help identif
 %% \paragraph{Mock Libraries}
 %% Our supported mock libraries take different approaches to instantiating mocks. All of the libraries have methods that generate mock objects; for instance, EasyMock contains the \texttt{createMock()} method. We consider return values from these methods to be mock objects. Additionally, Mockito contains a fluent \texttt{verify()} method which returns a mock object. Finally, Mockito and EasyMock also allow developers to mark fields as \texttt{@Mock}; we treat reads from such fields as mock objects. Both implementations start the analysis with these hard coded facts on mock source methods, as described in the mock libraries' documentation.
 
-\subsection{Mock Analysis is not just Reaching Definitions}
+\subsection{Analysis Design Considerations}
+\paragraph{Static vs Dynamic Analysis}
+We chose to implement static analyses to best support integration with our downstream client analysis; the intraprocedural Soot implementation is most suitable for integration, even if it is less precise. For collecting information about tests, whose behaviour generally does not vary between executions, dynamic analysis would also be quite precise. A dynamic analysis would work well for reporting information to developers, but less well as a feeder analysis to subsequent ones.
+
+\paragraph{Mock Analysis is not just Reaching Definitions}
 While our mock analysis is similar to reaching definitions, we point out some important differences which motivated our decision to design and implement a bespoke analysis. Even the base analysis requires slightly more than reaching definitions, and then we also support fields, containers and arrays.
 
 For the base analysis, querying reaching definition information almost works. However, mock analysis also requires propagating information through casts, as seen in the \texttt{AssignCast} rule in the declarative analysis; at statement {\tt s: x = (X)y;}, then {\tt x} would be a mock iff {\tt y} is. Statement {\tt s} would be a definition for {\tt x}, and a further query would be needed to know whether {\tt y} was a mock or not.
 
-Additionally, the field and array analyses each detected additional mocks in half of our benchmarks (Section~\ref{sec:evaluation}). Fields do not fit the reaching definition paradigm and would require additional support. Arrays would be possible but not obvious.
+Additionally, the array analysis detected additional mocks in half of our benchmarks (Section~\ref{sec:evaluation}). It would not be obvious to support arrays in the reaching definition paradigm; they would require additional support.
+
