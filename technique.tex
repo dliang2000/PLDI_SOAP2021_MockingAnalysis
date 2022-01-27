@@ -296,6 +296,16 @@ Call graphs are useful to our intraprocedural analysis because they help identif
 \paragraph{Static vs Dynamic Analysis}
 We chose to implement static analyses to best support integration with our envisioned downstream client analysis; the intraprocedural Soot implementation is most suitable for integration, even if it is less precise. For collecting information about tests, whose behaviour generally does not vary between executions, dynamic analysis would also be quite precise. A dynamic analysis would work well for reporting information to developers, but less well as a feeder analysis to subsequent ones.
 
+\paragraph{Sources of Imprecision}
+We explicitly list all known sources of imprecision in our analysis.
+\begin{itemize}[noitemsep]
+\item At a control-flow merge,  incoming branches (loops, conditionals) may bring different information; we may thus report false positives because we are a may-analysis.
+\item At method boundaries (formal parameters, return values), the intraprocedural Soot implementation assumes that incoming values are not mocks (unless a return value from a Collections API), while the Doop interprocedural implementation uses a context-insensitive approximation. This may result in false negatives in Soot and false positives in Doop. (Lambdas are implemented using method calls.)
+\item Arrays, fields, and collections are approximated such that if any mock is stored in the array, field, or collection, then all values coming from there are mocks; we are subject to false positives if arrays, fields or collections are heterogeneous over time or space.
+\end{itemize}
+We are also vulnerable to false negatives from missed collection APIs and mock APIs. False positives occur from the approximations above.
+
+
 \paragraph{Mock Analysis is not just Reaching Definitions}
 Our intraprocedural mock analysis is similar to reaching definitions. However, we point out some important differences which motivated our decision to design and implement a bespoke analysis. Even the base analysis requires slightly more than reaching definitions, and then we also support fields, containers and arrays. Our field and array analyses detected additional mocks in half of our benchmarks (Section~\ref{sec:evaluation}). It would not be obvious to support arrays in the reaching definition paradigm; they would require additional support.
 
