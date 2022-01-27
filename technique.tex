@@ -303,7 +303,7 @@ We explicitly list all known sources of imprecision in our analysis.
 \item At method boundaries (formal parameters, return values), the intraprocedural Soot implementation assumes that incoming values are not mocks (unless a return value from a Collections API), while the Doop interprocedural implementation uses a context-insensitive approximation. This may result in false negatives in Soot and false positives in Doop. (Lambdas are implemented using method calls.)
 \item Arrays, fields, and collections are approximated such that if any mock is stored in the array, field, or collection, then all values coming from there are mocks; we are subject to false positives if arrays, fields or collections are heterogeneous over time or space.
 \end{itemize}
-We are also vulnerable to false negatives from missed collection APIs and mock APIs. False positives occur from the approximations above.
+We are also vulnerable to false negatives (threatening soundness) from missed collection APIs and mock APIs. False positives (threatening precision) occur from the approximations above.
 
 
 \paragraph{Mock Analysis is not just Reaching Definitions}
