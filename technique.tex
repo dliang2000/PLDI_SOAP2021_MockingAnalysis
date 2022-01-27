@@ -302,6 +302,7 @@ We explicitly list all known sources of imprecision in our analysis.
 \item At a control-flow merge,  incoming branches (loops, conditionals) may bring different information; we may thus report false positives because we are a may-analysis.
 \item At method boundaries (formal parameters, return values), the intraprocedural Soot implementation assumes that incoming values are not mocks (unless a return value from a Collections API), while the Doop interprocedural implementation uses a context-insensitive approximation. This may result in false negatives in Soot and false positives in Doop. (Lambdas are implemented using method calls.)
 \item Arrays, fields, and collections are approximated such that if any mock is stored in the array, field, or collection, then all values coming from there are mocks; we are subject to false positives if arrays, fields or collections are heterogeneous over time or space.
+  \item As usual, our static analysis approach assumes that it has access to all of the program source; missing code (e.g. dynamically loaded) may result in false negatives.
 \end{itemize}
 We are also vulnerable to false negatives (threatening soundness) from missed collection APIs and mock APIs. False positives (threatening precision) occur from the approximations above.
 
