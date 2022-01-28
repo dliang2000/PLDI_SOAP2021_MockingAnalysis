@@ -3,7 +3,7 @@
 
 We implemented two complementary ways of statically computing mock information: 
 a declarative implementation (using Doop~\cite{bravenboer09:_stric_declar_specif_sophis_point_analy}), along with
-an imperative implementation of a dataflow analysis (using Soot~\cite{Vallee-Rai:1999:SJB:781995.782008}). 
+an imperative implementation of a dataflow analysis (using Soot~\cite{Vallee-Rai:1999:SJB:781995.782008}). While the core analysis implementations are similar, the Soot analysis is much easier for subsequent client analyses to build on. Because the Soot analysis is intraprocedural, it also runs much more quickly. On the other hand, it is easier to experiment with the Doop analysis. For instance, marking a field as mock-containing in Doop was quite easy (we added 3 rules), while the Soot version required us to write new code.
 %We started this project with the usual imperative approach to implementing a static analysis---in our context, that meant using Soot. Then, when we wanted to experiment with adding more features to the analysis, we decided that this was a good opportunity to learn about Doop's declarative approach as well. We added new features to the Doop implementation and backported them to the Soot implementation. 
 %Although the reason that two implementations exist is unimportant at this stage, the result is consequential:
 The existence of these two implementations is a rare opportunity to cross-check static analysis results. We thus carefully compared our results to make sure that they matched.
@@ -12,68 +12,72 @@ The existence of these two implementations is a rare opportunity to cross-check 
 
 \subsection{Declarative Doop Implementation}
 \label{sec:dec-doop}
-We next describe the declarative Doop-based technique that \textsc{MockDetector} uses. We implemented this technique by writing Datalog rules. We propagate mockness from known mock sources, through the statements in the intermediate representation (IR), to potential mock invocation sites. 
+We next describe the declarative Doop-based technique that \textsc{MockDetector} uses. Both implementations propagate mockness from known mock sources, through the statements in the intermediate representation (IR), to potential mock invocation sites. Doop analyses specify propagation using Datalog rules. 
 
 %We chose to implement a may-analysis rather than a must-analysis for two reasons: 1) we did not observe any cases where a value was assigned a mock on one branch and a real object on the other branch; 2) implementing a must-analysis would not help heuristics to find focal methods, as a must-analysis would rule out fewer mock invocations. 
 
-From our perspective, including (context-insensitive) interprocedural support is almost trivial; we only need to add two rules. The Doop analysis also supports arrays, containers, and fields. Although declarative analyses are easier to define than their imperative counterparts, they are subject to the feature interaction problem: for instance, they still need to specifically handle the case where an array-typed field is assigned from a mock-containing array local.
+Adding (context-insensitive) interprocedural support to a Doop analysis is almost trivial: we only needed to add two rules.
+Both analyses support arrays, containers, and fields. Although declarative analyses are easier to define than their imperative counterparts, they are still subject to the feature interaction problem: for instance, they still must specifically handle the case where an array-typed field is assigned from a mock-containing array local.
 
 % Mock Libraries discussed in Common Infrastructure section, perhaps refer to the paragraph in Common Infrastructure section?
-The core of the implementation starts by declaring facts for 9 mock source methods manually gleaned from the mock libraries' documentation, as specified through method signatures (e.g. 
+The implementation declares facts for 9 mock source methods manually gleaned from the mock libraries' documentation, as specified through method signatures (e.g. 
 \texttt{<org.mockito.Mockito: java.lang.Object mock(java.lang.Class)>}.)
 It then declares that a variable {\tt v} satisfies \verb+isMockVar(v)+ if it is assigned from the return value of a mock source, or otherwise traverses the program's interprocedural control-flow graph, through assignments, which may possibly flow through fields, collections, or arrays. Finally, an invocation site is a mock invocation if the receiver object {\tt v} satisfies \verb+isMockVar(v)+.
 
-\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,label={lst:core}]
+\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,label={lst:core},caption={Selected rules for Datalog mock analysis}]
 // v = mock()
 isMockVar(v) :-
-AssignReturnValue(mi, v),
-callsMockSource(mi).
+  AssignReturnValue(mi, v),
+  callsMockSource(mi).
 // v = (type) from
 isMockVar(v) :- isMockVar(from),
-AssignCast(_/* type */, from, v, _/* inmethod */).
+  AssignCast(_/* type */, from, v, _/* inmethod */).
 // v = v1
 isMockVar(v) :- isMockVar(v1),
-AssignLocal(v1, v, _).
+  AssignLocal(v1, v, _).
 \end{lstlisting}
 
-The predicates \texttt{AssignReturnValue}, \texttt{AssignCast}, and \texttt{AssignLocal} are provided by Doop, and resemble Java bytecode instructions. Unlike Java bytecode, however, their arguments are explicit, and not stack-based. For instance, \texttt{AssignLocal(?from:Var, ?to:Var, ?inmethod:Method)} denotes an assignment statement copying from \texttt{?from} to \texttt{?to} in method \texttt{?inmethod}. (It is Datalog convention to prefix parameters with \texttt{?}s).
+The Doop-provided predicates \texttt{AssignReturnValue}, \texttt{AssignCast}, and \texttt{AssignLocal} resemble Java bytecode instructions; for instance, \texttt{AssignLocal(?from:Var, ?to:Var, ?inmethod:Method)} is an assignment statement copying from variable \texttt{?from} to \texttt{?to} in method \texttt{?inmethod}. (It is Datalog convention to prefix parameters with \texttt{?}s).
 
 We designed the analysis in a modular fashion, such that the interprocedural, collections, arrays, and fields support can all be disabled through the use of \verb+#ifdef+s, which can be specified on the Doop command-line.
 
-\paragraph{Interprocedural support} 
-\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none]
+\paragraph{Interprocedural support}
+As mentioned above, it was quite easy to implement interprocedural analysis in our Doop implementation; we leveraged Doop's call graph and simply propagated mockness information along its call graph edges.
+
+\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,caption={Two rules give interprocedural analysis in Doop.}]
 // v = callee(), where callee's return var is mock
 isInterprocMockVar(v) :-
-AssignReturnValue(mi, v),
-mainAnalysis.CallGraphEdge(_, mi, _, callee),
-ReturnVar(v_callee, callee),
-isMockVar(v_callee).
+  AssignReturnValue(mi, v),
+  mainAnalysis.CallGraphEdge(_, mi, _, callee),
+  ReturnVar(v_callee, callee),
+  isMockVar(v_callee).
 
-// callee(v) results in formal param of callee being mock
+// callee(v) results in formal
+//   param of callee being mock
 isInterprocMockVar(v_callee) :- isMockVar(v),
-ActualParam(n, mi, v),
-FormalParam(n, callee, v_callee),
-mainAnalysis.CallGraphEdge(_, mi, _, callee),
-Method_DeclaringType(callee, callee_class),
-ApplicationClass(callee_class).
+  ActualParam(n, mi, v),
+  FormalParam(n, callee, v_callee),
+  mainAnalysis.CallGraphEdge(_, mi, _, callee),
+  Method_DeclaringType(callee, callee_class),
+  ApplicationClass(callee_class).
 \end{lstlisting}
-We use Doop-provided call graph edges (relation \texttt{mainAnalysis.CallGraphEdge}) between the method invocation {\tt mi} and its callee {\tt callee}; the first rule propagates information from callees back to their callers, while the second rule propagates information from callers to callees through parameters. We restrict our analysis to so-called ``application classes'', excluding in particular the Java standard library. We chose to run our context-insensitive analysis on top of Doop's context-insensitive call graph. Mirroring Doop itself, it would also be possible to add context sensitivity to our analysis, potentially reducing the number of false positives.%, but our results suggest that this would not help much; we'll return to that point in Section~\ref{sec:evaluation}.
+We use Doop's call graph edges (\texttt{mainAnalysis.CallGraphEdge}) between the method invocation {\tt mi} and its callee {\tt callee}; the first rule propagates information from callees back to their callers, while the second rule propagates information from callers to callees through parameters. We restrict our analysis to so-called ``application classes'', excluding in particular the Java standard library. We chose to run our context-insensitive analysis on top of Doop's context-insensitive call graph. Mirroring Doop itself, it would also be possible to add context sensitivity to our analysis, potentially reducing the number of false positives.%, but our results suggest that this would not help much; we'll return to that point in Section~\ref{sec:evaluation}.
 
-\paragraph{Arrays and Containers} Consistent with our analysis being a may-analysis, we define predicate {\tt isArrayLocalThatContainsMocks} to record local variables pointing to arrays that may contain mock objects. This predicate is true whenever the program under analysis stores a mock variable into an array; we also transfer array-mockness through assignments and casts. When a local variable \texttt{v} is read from a mock-containing array \texttt{c}, then \texttt{v} is marked as a mock variable, as seen in the first rule below. An store of a mock variable \texttt{mv} into an array \texttt{c} causes that array to be marked as \texttt{isArrayLocalThatContainsMocks}. Note that these predicates are mutually-recursive. Similarly with containers. We also handle {\tt Collection.toArray} by propagating mockness from the collection to the array.
+\paragraph{Arrays and Containers} We record local variables pointing to mock-containing arrays using  {\tt isArrayLocalThatContainsMocks}. This predicate is true whenever the program under analysis stores a mock variable into an array; we also transfer array-mockness through assignments and casts. When a local variable \texttt{v} is read from a mock-containing array \texttt{c}, then \texttt{v} is marked as a mock variable, as seen in the first rule below. A store of a mock variable \texttt{mv} into an array \texttt{c} causes that array to be \texttt{isArrayLocalThatContainsMocks}. Note that these predicates are mutually-recursive. 
 
-\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none]
+\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,caption={Rules for handling arrays.}]
 // v = c[idx]
 isMockVar(v) :-
-isArrayLocalThatContainsMocks(c),
-LoadArrayIndex(c, v, _ /* idx */).
+  isArrayLocalThatContainsMocks(c),
+  LoadArrayIndex(c, v, _ /* idx */).
 
 // c[idx] = mv
 isArrayLocalThatContainsMocks(c) :-
-StoreArrayIndex(mv, c, _ /* idx */),
-isMockVar(mv).
+  StoreArrayIndex(mv, c, _ /* idx */),
+  isMockVar(mv).
 \end{lstlisting}
 
-We treat collections analogously. However, while there is one API for arrays---bytecode array load and store instructions---Java's Collections APIs include, by our count, 60 relevant methods. We support iterators, collection copies via constructors, and add-all methods. We use our classification of collection methods to identify collection reads and writes and handle them as we do array reads and writes.%, except that we say that it is a mock-containing collection, not a mock-containing array.
+We treat collections analogously. However, while there is one API for arrays---bytecode array load and store instructions---Java's Collections APIs include, by our count, 60 relevant methods. We support iterators, collection copies via constructors, and add-all methods. We use our classification of collection methods to identify collection reads and writes and handle them as we do array reads and writes. We also handle {\tt Collection.toArray} by propagating mockness from the collection to the array.%, except that we say that it is a mock-containing collection, not a mock-containing array.
 
 \paragraph{Fields} Apart from the obvious rule stating that a field which is assigned from a mock satisfies {\tt fieldContainsMock}, we also label fields that have the {\tt org.mockito.Mock} or {\tt org.easyMock.Mock} annotations as mock-containing. We declare that a given field \emph{signature} may contain a mock, i.e. the field with a given signature belonging to all objects of a given type. We also support containers stored in fields.
 
@@ -81,8 +85,8 @@ We treat collections analogously. However, while there is one API for arrays---b
 
 \subsection{Imperative Soot Implementation}
 \label{subsec:soot}
-We now briefly describe the Soot-based imperative dataflow analysis to find mocks. Like the declarative analysis, we track information from the creation sites through the control-flow graph. Here, we implement a forward dataflow may-analysis---an object is declared a mock if there exists some execution path where it may receive a mock value. Our implementation also understands containers (arrays and collections), and tracks whether containers hold any mock objects. The abstraction marks all contents of collections as potential mocks if it observes any mock object being put into the array or container. It maps values in the IR to three bits: one for the value being a mock, one for it being an array containing a mock, and one for it being a collection containing a mock. %At most one of the three bits may be true for any given value.
-Space limitations prevent us from including full details of this implementation, but we will make all implementations available, and the analysis is fully described in the first author's master's thesis\footnote{Citation temporarily omitted due to double-blind review.}.
+We now briefly describe our Soot-based imperative dataflow analysis to find mocks. Like the declarative analysis, we track information from the creation sites through the control-flow graph. Here, we implement a forward dataflow may-analysis---an object is declared a mock if there exists some execution path where it may receive a mock value. The treatment of arrays, fields, and containers mirrors that in the Doop implementation. The dataflow analysis maps values in the IR to three bits: one for the value being a mock, one for it being an array containing a mock, and one for it being a collection containing a mock. %At most one of the three bits may be true for any given value.
+Space limitations prevent us from including full details of this implementation, but we will make all implementations available, and the analysis is fully described in the first author's master's thesis\footnote{Citation temporarily omitted due to double-blind review, but available on our institutional repository.}.
 
 % Mock Libraries discussed in Common Infrastructure section
 %\paragraph{Define Common Mocking Library APIs}
@@ -189,7 +193,7 @@ Space limitations prevent us from including full details of this implementation,
 
 %% \paragraph{Arrays and containers} At a read from an array into a local variable, where the source array is mock-containing, we declare that the local destination is a mock. At a write of a local variable into an array, where the local variable is mock-containing, we declare that the array is mock-containing.
 
-\paragraph{Interprocedural support} Heros\cite{bodden12:_inter_proced_data_flow_analy} implements IFDS/IDE for the Soot program analysis framework. We have explored implementing our analysis in Heros, but this would be a more involved process than in the declarative case, where we simply added two rules to obtain the interprocedural analysis. We decided that, for our purposes, the extra effort required to formulate our analysis as IFDS would not give us any additional understanding of the problem; comparing the Doop intraprocedural and interprocedural results was sufficient.
+\paragraph{Interprocedural support} Heros~\cite{bodden12:_inter_proced_data_flow_analy} implements IFDS/IDE for Soot. We explored implementing our analysis in Heros, but this would be more difficult than in Doop, where we simply added two rules to get the interprocedural analysis. We decided that, for our purposes, the extra effort required to formulate our analysis as IFDS would not give us any additional insights; comparing the Doop intraprocedural and interprocedural results sufficed. (Practically speaking, the increased runtime of an IFDS implementation also makes it less viable for subsequent client analyses to use.)
 
 %In particular, Heros uses a different API in its implementation than Soot. Conceptually, though, it should be no harder to implement an interprocedural Heros analysis than an intraprocedural Soot dataflow analysis. 
 
@@ -213,7 +217,7 @@ Space limitations prevent us from including full details of this implementation,
 
 \subsubsection{Pre-Analyses for Field Mocks Defined in Constructors and Before Methods}
 \label{subsubsec:pre-analysis} 
-A number of our benchmarks define fields as mock objects via EasyMock or Mockito \texttt{@Mock} annotations, or initialize these fields in the \texttt{<init>} constructor or \texttt{@Before} methods (\textit{setUp()} in JUnit 3), which test runners will execute before any test methods from those classes. These mock field or mock-containing container fields are then used in tests. In the Soot implementation, we use two pre-analyses before running the main analysis, under the assumption that fields are rarely mutated in the test cases (and that it is incorrect to do so). We have validated our assumption on benchmarks. An empirical analysis of our benchmarks shows that fewer than 0.3\% of fields (29/9352) are mutated in tests.
+A number of our benchmarks define fields as mock objects via EasyMock or Mockito \texttt{@Mock} annotations, or initialize these fields in the \texttt{<init>} constructor or \texttt{@Before} methods (\textit{setUp()} in JUnit 3), which test runners will execute before any test methods from those classes. These mock field or mock-containing container fields are then used in tests. (The Doop analysis explicitly handles annotations, and the interprocedural rules handle \texttt{@Before} methods). In the Soot implementation, we use two pre-analyses before running the main analysis, under the assumption that fields are rarely mutated in the test cases (and that it is incorrect to do so). We have validated our assumption on benchmarks. An empirical analysis of our benchmarks shows that fewer than 0.3\% of fields (29/9352) are mutated in tests.
 %Table~\ref{tab:mutations} shows a preliminary analysis of field mutation frequency inside test cases---fewer than 0.3\% of fields are mutated in test cases.
 
 %% The first pre-analysis handles annotated field mocks and field mocks defined in constructors (\texttt{<init>} methods), while the second handles \texttt{@Before} and \texttt{setUp()} methods. 
@@ -221,7 +225,7 @@ A number of our benchmarks define fields as mock objects via EasyMock or Mockito
 % obvious enough that we don't need to belabour this point
 % Listing~\ref{lis:annotatedMock} illustrates a Mockito annotated field mock example taken from \texttt{DefaultToolchainManagerTest.java} class in maven-core.
 
-\textsc{MockDetector} retrieves all fields in all test classes, and marks fields annotated {\tt @org.mockito.Mock} or {\tt @org.easymock.Mock} as mocks. Also, Listing~\ref{lis:fieldMock} depicts an example where instance fields are initialized using field initializers. Java copies such initializers into all constructors (\texttt{<init>}). To detect such mock-containing fields, our first pre-analysis applies the dataflow analysis to all constructors in the test classes prior to running the main analysis, using the same logic that we use to detect mock objects or mock-containing containers. The second pre-analysis handles field mocks defined in \texttt{@Before} methods just like the first pre-analysis handled constructors.
+Our analysis retrieves all fields in all test classes, and marks fields annotated {\tt @org.mockito.Mock} or {\tt @org.easymock.Mock} as mocks. Also, Listing~\ref{lis:fieldMock} depicts an example where instance fields are initialized using field initializers. Java copies such initializers into all constructors (\texttt{<init>}). To detect such mock-containing fields, our first pre-analysis applies the dataflow analysis to all constructors in the test classes prior to running the main analysis, using the same logic that we use to detect mock objects or mock-containing containers. The second pre-analysis handles field mocks defined in \texttt{@Before} methods just like the first pre-analysis handled constructors.
 
 %% Listing~\ref{lis:fieldMock2} illustrates an example where fields are defined as mocks via mock-creation source methods inside the @Before method. Similarly, the field mocks initialized inside the @Before methods are determined by applying the forward dataflow analysis strictly on all @Before methods before the main analysis, where the values  
 
@@ -277,7 +281,7 @@ private RuleFactory ruleFactory = mock(RuleFactory.class);
 \label{sec:common}
 We have parameterized our technique with respect to mocking libraries and have instantiated it with respect to the popular Java libraries Mockito, EasyMock, and PowerMock. We also support JUnit 3 and 4+. %We discuss the parameterization in this subsection.
 
-Both JUnit and mocking libraries rely heavily on reflection, and would normally pose problems for static analyses: the set of reachable test methods is enumerated at run-time, and mock libraries create mock objects reflectively. Fortunately, their use of reflection is stylized, and we have designed our analyses to soundly handle these libraries.
+JUnit and mocking libraries all rely heavily on reflection, and would normally pose problems for static analyses: the set of reachable test methods is enumerated at run-time; mock libraries create mock objects reflectively. Fortunately, their use of reflection is stylized. We designed our analyses to soundly handle these libraries.
 
 \paragraph{JUnit and Driver Generation}
 JUnit tests are simply methods that developers write in test classes, appropriately annotated (in JUnit 3 by method name starting with ``test'', in 4+ by a \texttt{@Test} annotation). A JUnit test runner uses reflection to find tests. Out of the box, static analysis engines do not see tests as reachable code.
@@ -289,9 +293,7 @@ Our tool then creates a RootDriver class at the root package level, which invoke
 
 All static frameworks must somehow approximate the set of entry points as appropriate for their targets. For instance, the Wala framework~\cite{wala19:_t} also creates synthetic entry points, but it does this to perform pointer analysis on a program's main code rather than to enumerate the program's test cases.
 
-\paragraph{Intraprocedural Analysis} The Soot analysis is intraprocedural and the Doop analysis has an intraprocedural version. Intraprocedurally, we make the unsound (but reasonable for our anticipated use case) assumption that mockness can be dropped between callers and callees: at method entry points, no parameters are assumed to be mocks, and at method returns, the returned object is never a mock. Doop's interprocedural version drops this assumption and instead context-insensitively propagates information from callers to callees and back; we discuss the results in Section~\ref{sec:evaluation}.
-
-Call graphs are useful to our intraprocedural analysis because they help identify calls to mock source methods (that we identify explicitly). We assume that developers do not call inherited versions of mock creation sites (e.g. a wrapper of the mock source method), but if we have a call graph and observe calls to such methods in Doop, we include them.
+%% \paragraph{Intraprocedural Analysis} The Soot analysis is intraprocedural and the Doop analysis has an intraprocedural version. Intraprocedurally, we make the unsound (but reasonable for our anticipated use case) assumption that mockness can be dropped between callers and callees: at method entry points, no parameters are assumed to be mocks, and at method returns, the returned object is never a mock. Doop's interprocedural version drops this assumption and instead context-insensitively propagates information from callers to callees and back; we discuss the results in Section~\ref{sec:evaluation}.
 
 %% \paragraph{Mock Libraries}
 %% Our supported mock libraries take different approaches to instantiating mocks. All of the libraries have methods that generate mock objects; for instance, EasyMock contains the \texttt{createMock()} method. We consider return values from these methods to be mock objects. Additionally, Mockito contains a fluent \texttt{verify()} method which returns a mock object. Finally, Mockito and EasyMock also allow developers to mark fields as \texttt{@Mock}; we treat reads from such fields as mock objects. Both implementations start the analysis with these hard coded facts on mock source methods, as described in the mock libraries' documentation.
@@ -303,13 +305,17 @@ We chose to implement static analyses to best support integration with our envis
 
 \paragraph{Sources of Imprecision}
 We explicitly list all known sources of imprecision in our analysis; we investigate their practical impact in Section~\ref{sec:evaluation}.
+Approximations may result in false positives (threatening precision), while missed behaviours can cause false negatives (threatening soundness).
 \begin{itemize}[noitemsep]
-\item At a control-flow merge,  incoming branches (loops, conditionals) may bring different information; we may thus report false positives because we are a may-analysis.
-\item At method boundaries (formal parameters, return values), the intraprocedural Soot implementation assumes that incoming values are not mocks (unless a return value from a Collections API), while the Doop interprocedural implementation uses a context-insensitive approximation. This may result in false negatives in Soot and false positives in Doop. (Lambdas are implemented using method calls.)
+\item At control-flow merges, incoming branches (loops, conditionals) may bring information which must be approximated; our may-analysis could thus report false positives.
+\item At method boundaries (formal parameters, return values), our intraprocedural implementations assume that incoming values are not mocks (unless a return value from a Collections API), while the Doop interprocedural implementation uses a context-insensitive approximation. The not-mock assumption may result in false negatives for Soot; extraneous call-graph edges may result in Doop interprocedural false positives. (Lambdas are implemented using method calls and result in intraprocedural false negatives.)
 \item Arrays, fields, and collections are approximated such that if any mock is stored in the array, field, or collection, then all values coming from there are mocks; we are subject to false positives if arrays, fields or collections are heterogeneous over time or space.
+\item Although we have manually categorized collection APIs and mock APIs, it is possible that our enumeration is incomplete, leading to false negatives.
+Soot also assumes that developers do not call inherited versions of mock creation sites (e.g. a wrapper of the mock source method). Doop's interprocedural analysis can and does detect such mock creations (fewer than 5).
   \item As usual, our static analysis approach assumes that it has access to all of the program source; missing code (e.g. dynamically loaded) may result in false negatives.
 \end{itemize}
-False positives (threatening precision) result from the approximations above. In addition to what is mentioned above, we are also vulnerable to false negatives (threatening soundness) from missed collection APIs and mock APIs. 
+
+%Call graphs are useful to our intraprocedural analysis because they help identify calls to mock source methods.
 
 \paragraph{Mock Analysis is not just Reaching Definitions}
 Our intraprocedural mock analysis is similar to reaching definitions. However, we point out some important differences which motivated our decision to design and implement a bespoke analysis. Even the base analysis requires slightly more than reaching definitions, and then we also support fields, containers and arrays. Our field and array analyses detected additional mocks in half of our benchmarks (Section~\ref{sec:evaluation}). It would not be obvious to support arrays in the reaching definition paradigm; they would require additional support.
