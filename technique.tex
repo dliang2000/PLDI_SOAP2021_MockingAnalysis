@@ -5,7 +5,8 @@ We implemented two complementary ways of statically computing mock information:
 a declarative implementation (using Doop~\cite{bravenboer09:_stric_declar_specif_sophis_point_analy}), along with
 an imperative implementation of a dataflow analysis (using Soot~\cite{Vallee-Rai:1999:SJB:781995.782008}). 
 %We started this project with the usual imperative approach to implementing a static analysis---in our context, that meant using Soot. Then, when we wanted to experiment with adding more features to the analysis, we decided that this was a good opportunity to learn about Doop's declarative approach as well. We added new features to the Doop implementation and backported them to the Soot implementation. 
-Although the reason that two implementations exist is unimportant at this stage, the result is consequential: the existence of these two implementations is a rare opportunity to cross-check static analysis results. We thus carefully compared our results to make sure that they matched.
+%Although the reason that two implementations exist is unimportant at this stage, the result is consequential:
+The existence of these two implementations is a rare opportunity to cross-check static analysis results. We thus carefully compared our results to make sure that they matched.
 %Since the focus of this paper is on mock analysis, we will not discuss specific implementation details in depth.
 %While the core analysis is similar, the different implementation technologies have different affordances. For instance, it is easier for the Doop version to mark a field as mock-containing (we added 3 rules) than for the Soot version to do so. We start by describing each implementation in turn, and conclude this section with the commonalities between the two implementations. Section~\ref{sec:evaluation} then presents the results obtained using each technology and compares them.
 
@@ -13,9 +14,9 @@ Although the reason that two implementations exist is unimportant at this stage,
 \label{sec:dec-doop}
 We next describe the declarative Doop-based technique that \textsc{MockDetector} uses. We implemented this technique by writing Datalog rules. We propagate mockness from known mock sources, through the statements in the intermediate representation (IR), to potential mock invocation sites. 
 
-We chose to implement a may-analysis rather than a must-analysis for two reasons: 1) we did not observe any cases where a value was assigned a mock on one branch and a real object on the other branch; 2) implementing a must-analysis would not help heuristics to find focal methods, as a must-analysis would rule out fewer mock invocations. 
+%We chose to implement a may-analysis rather than a must-analysis for two reasons: 1) we did not observe any cases where a value was assigned a mock on one branch and a real object on the other branch; 2) implementing a must-analysis would not help heuristics to find focal methods, as a must-analysis would rule out fewer mock invocations. 
 
-From our perspective, including (context-insensitive) interprocedural support is almost trivial; we only need to add two rules. The Doop analysis also supports arrays, containers, and fields. Although declarative analyses are easy to define than their imperative counterparts, they are subject to the feature interaction problem: for instance, they still need to specifically handle the case where an array-typed field is assigned from a mock-containing array local.
+From our perspective, including (context-insensitive) interprocedural support is almost trivial; we only need to add two rules. The Doop analysis also supports arrays, containers, and fields. Although declarative analyses are easier to define than their imperative counterparts, they are subject to the feature interaction problem: for instance, they still need to specifically handle the case where an array-typed field is assigned from a mock-containing array local.
 
 % Mock Libraries discussed in Common Infrastructure section, perhaps refer to the paragraph in Common Infrastructure section?
 The core of the implementation starts by declaring facts for 9 mock source methods manually gleaned from the mock libraries' documentation, as specified through method signatures (e.g. 
@@ -188,8 +189,11 @@ Space limitations prevent us from including full details of this implementation,
 
 %% \paragraph{Arrays and containers} At a read from an array into a local variable, where the source array is mock-containing, we declare that the local destination is a mock. At a write of a local variable into an array, where the local variable is mock-containing, we declare that the array is mock-containing.
 
-\paragraph{Interprocedural support} The Heros framework\cite{bodden12:_inter_proced_data_flow_analy} implements IFDS/IDE for program analysis frameworks including Soot. With some effort, it would be possible to rewrite our mock analysis with Heros; however, this would be a more involved process than in the declarative case, where we simply added two rules to obtain the interprocedural analysis. In particular, Heros uses a different API in its implementation than Soot. Conceptually, though, it should be no harder to implement an interprocedural Heros analysis than an intraprocedural Soot dataflow analysis. 
+\paragraph{Interprocedural support} Heros\cite{bodden12:_inter_proced_data_flow_analy} implements IFDS/IDE for the Soot program analysis framework. We have explored implementing our analysis in Heros, but this would be a more involved process than in the declarative case, where we simply added two rules to obtain the interprocedural analysis. We decided that, for our purposes, the extra effort required to formulate our analysis as IFDS would not give us any additional understanding of the problem; comparing the Doop intraprocedural and interprocedural results was sufficient.
 
+%In particular, Heros uses a different API in its implementation than Soot. Conceptually, though, it should be no harder to implement an interprocedural Heros analysis than an intraprocedural Soot dataflow analysis. 
+
+%With some effort, it would be possible to rewrite our mock analysis with Heros; however, 
 
 %%  Several test suites use arrays or collection objects to hold mock objects. In this scenario, our tool would consider that mockness propagates out to the container. For instance, say the flow function encounters an array write \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none]
 %%     r1[0] = r2
@@ -244,7 +248,7 @@ A number of our benchmarks define fields as mock objects via EasyMock or Mockito
 %% }
 %% \end{lstlisting}
 
-\begin{lstlisting}[basicstyle=\ttfamily, caption={Field mocks defined by field initializations from \texttt{TypeRuleTest} \\ in jsonschema2pojo.},
+\begin{lstlisting}[basicstyle=\ttfamily, caption={Field mocks defined by field initializations from \texttt{TypeRuleTest} in jsonschema2pojo.},
 basicstyle=\scriptsize\ttfamily,language = Java, framesep=4.5mm,
 framexleftmargin=1mm, captionpos=b, label=lis:fieldMock, numbers=none]
 private GenerationConfig config = mock(GenerationConfig.class);
@@ -285,7 +289,7 @@ Our tool then creates a RootDriver class at the root package level, which invoke
 
 All static frameworks must somehow approximate the set of entry points as appropriate for their targets. For instance, the Wala framework~\cite{wala19:_t} also creates synthetic entry points, but it does this to perform pointer analysis on a program's main code rather than to enumerate the program's test cases.
 
-\paragraph{Intraprocedural Analysis} The Soot analysis is intraprocedural and the Doop analysis has an intraprocedural version. Intraprocedurally, we make the unsound (but reasonable for our anticipated use case) assumption that mockness can be dropped between callers and callees: at method entry points, no parameters are assumed to be mocks, and at method returns, the returned object is never a mock. Doop's interprocedural version drops this assumption and instead context-insensitively propagates information from callers to callees and back; we discuss the results of doing so in Section~\ref{sec:evaluation}.
+\paragraph{Intraprocedural Analysis} The Soot analysis is intraprocedural and the Doop analysis has an intraprocedural version. Intraprocedurally, we make the unsound (but reasonable for our anticipated use case) assumption that mockness can be dropped between callers and callees: at method entry points, no parameters are assumed to be mocks, and at method returns, the returned object is never a mock. Doop's interprocedural version drops this assumption and instead context-insensitively propagates information from callers to callees and back; we discuss the results in Section~\ref{sec:evaluation}.
 
 Call graphs are useful to our intraprocedural analysis because they help identify calls to mock source methods (that we identify explicitly). We assume that developers do not call inherited versions of mock creation sites (e.g. a wrapper of the mock source method), but if we have a call graph and observe calls to such methods in Doop, we include them.
 
@@ -298,15 +302,14 @@ Call graphs are useful to our intraprocedural analysis because they help identif
 We chose to implement static analyses to best support integration with our envisioned downstream client analysis; the intraprocedural Soot implementation is most suitable for integration, even if it is less precise. For collecting information about tests, whose behaviour generally does not vary between executions, dynamic analysis would also be quite precise. A dynamic analysis would work well for reporting information to developers, but less well as a feeder analysis to subsequent ones.
 
 \paragraph{Sources of Imprecision}
-We explicitly list all known sources of imprecision in our analysis.
+We explicitly list all known sources of imprecision in our analysis; we investigate their practical impact in Section~\ref{sec:evaluation}.
 \begin{itemize}[noitemsep]
 \item At a control-flow merge,  incoming branches (loops, conditionals) may bring different information; we may thus report false positives because we are a may-analysis.
 \item At method boundaries (formal parameters, return values), the intraprocedural Soot implementation assumes that incoming values are not mocks (unless a return value from a Collections API), while the Doop interprocedural implementation uses a context-insensitive approximation. This may result in false negatives in Soot and false positives in Doop. (Lambdas are implemented using method calls.)
 \item Arrays, fields, and collections are approximated such that if any mock is stored in the array, field, or collection, then all values coming from there are mocks; we are subject to false positives if arrays, fields or collections are heterogeneous over time or space.
   \item As usual, our static analysis approach assumes that it has access to all of the program source; missing code (e.g. dynamically loaded) may result in false negatives.
 \end{itemize}
-We are also vulnerable to false negatives (threatening soundness) from missed collection APIs and mock APIs. False positives (threatening precision) occur from the approximations above.
-
+False positives (threatening precision) result from the approximations above. In addition to what is mentioned above, we are also vulnerable to false negatives (threatening soundness) from missed collection APIs and mock APIs. 
 
 \paragraph{Mock Analysis is not just Reaching Definitions}
 Our intraprocedural mock analysis is similar to reaching definitions. However, we point out some important differences which motivated our decision to design and implement a bespoke analysis. Even the base analysis requires slightly more than reaching definitions, and then we also support fields, containers and arrays. Our field and array analyses detected additional mocks in half of our benchmarks (Section~\ref{sec:evaluation}). It would not be obvious to support arrays in the reaching definition paradigm; they would require additional support.
