@@ -84,7 +84,7 @@ isMockInvocation(<Object:void foo()>/test/0,
 
 \paragraph{Extensions: arrays and collections} While designing \textsc{MockDetector}, we observed that developers store mock objects in arrays and collections. Listing~\ref{lis:container} presents method \textit{setUp()} in class \texttt{NodeListIteratorTest} from commons-collections-4.4. Line \ref{line:storeMocksInArray} puts mock \texttt{Node} objects in array field \texttt{nodes}, later used in tests. When the dataflow analysis encounters an assignment statement containing an array read or write, it first looks for values (local variables or field reference sources) on the opposite side of the assignment (the statement's destination or source) in the IR. It then checks whether any of these locals or fields are mocks. If so, then the tool would mark the local or field reference as an array mock---it propagates mockness to the array container.
 
-\begin{lstlisting}[basicstyle=\ttfamily, caption={This example illustrates a field array container holding mock \\ objects from \textit{setUp()} in \texttt{NodeListIteratorTest}.},
+\begin{lstlisting}[basicstyle=\ttfamily, caption={This example illustrates a field array container holding mock objects from \textit{setUp()} in \texttt{NodeListIteratorTest}.},
 basicstyle=\scriptsize\ttfamily,language = Java, framesep=4.5mm, framexleftmargin=1.0mm, captionpos=b, label=lis:container, escapechar=|, morekeywords={@Test}]
 // Node array to be filled with mock Node instances
 private Node[] nodes;
