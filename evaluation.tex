@@ -195,7 +195,7 @@ Table~\ref{tab:invokes} is the core result about our mock analyses. It presents 
 
 In Section~\ref{sec:common} we discussed the implementation of our intraprocedural and interprocedural analyses. We can now discuss the effects of these implementation choices on the experimental results. Recall that we chose, unsoundly, to not propagate any information across method calls in the intraprocedural analysis. Thus, the intraproc columns in Table~\ref{tab:invokes} show smaller numbers than the interproc columns, as expected. Note also that there is a sometimes drastic increase from the intraprocedural to the interprocedural result, e.g. from 40 to 1300 for \textsc{flink}. This is because mocks can propagate from tests to the methods that they call and all around the main program code. It would be desirable to be able to differentiate test helper methods, which we want to propagate mocks to, from methods in the main program, which we generally do not want to propagate mocks to; however, Doop treats test and main code identically.
 
-One false negative in the intraprocedural analysis that we specifically point out is due to lambda expressions. Mockness should propagate to lambdas, but that requires an interprocedural analysis. % The Doop interprocedural implementation [should] finds these mocks.
+One false negative in the intraprocedural analysis that we specifically point out is due to lambda expressions. Mockness should propagate to lambdas, but that requires an interprocedural analysis. The Doop interprocedural implementation [should] finds these mocks.
 
 \begin{mdframed}[
 	leftmargin=\parindent,
