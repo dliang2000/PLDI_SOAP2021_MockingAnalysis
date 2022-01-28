@@ -37,8 +37,7 @@ assertEquals( 0, basics.length );
 	// mock: |\cmark|
 	object2.foo();
 	\end{lstlisting}
-	%    \includegraphics[width=.25\textwidth]{Images/mockInvocationIllustration.png}
-	
+	%    \includegraphics[width=.25\textwidth]{Images/mockInvocationIllustration.png}	
 	\caption{Our static analysis propagates mockness from sources (e.g. \texttt{mock(Object.class}) to invocations.}
 	\label{fig:mockMethodIllustration}
 	
@@ -51,7 +50,8 @@ java.lang.Object $r1, r2;
 $r1 = new java.lang.Object; |\label{line:lis3line3}|
 specialinvoke $r1.<java.lang.Object: void <init>()>(); |\label{line:lis3line4}|
 virtualinvoke $r1.<java.lang.Object: void foo()>(); |\label{line:lis3line5}|
-r2 = staticinvoke <org.mockito.Mockito: java.lang.Object mock(java.lang.Class)> (class "Ljava/lang/Object;"); |\label{line:lis3line6}|
+r2 = staticinvoke <org.mockito.Mockito: java.lang.Object
+	mock(java.lang.Class)> (class "Ljava/lang/Object;"); |\label{line:lis3line6}|
 virtualinvoke r2.<java.lang.Object: void foo()>(); |\label{line:lis3line9}|
 \end{lstlisting}
 
@@ -60,7 +60,7 @@ Figure~\ref{fig:mockMethodIllustration} shows how our dataflow analysis works; L
 %In practice, our abstraction simply does not create an explicit binding for \texttt{\$r1}, instead leaving the mapping empty as it was prior to line~\ref{line:lis3line3}, tantamount to creating a new \texttt{MockStatus} with all bits false and binding it to \texttt{\$r1}. 
 Thus, invocation \texttt{object1.foo()} on line 5 in Figure~\ref{fig:mockMethodIllustration} is not known to be a mock invocation. Tying back to our focal methods application, we would not exclude the call to \texttt{foo()} from being a possible focal method.
 
-On the other hand, our imperative analysis sees mock creation API \texttt{<org.mockito.Mockito: java.lang.Object mock(java.lang.Class)>} on line~\ref{line:lis3line6} in the Jimple IR. It thus adds a mapping from local variable \texttt{r2} to a new \texttt{MockStatus} with mock bit set to true. Because \texttt{r2} has a mapping in the abstraction with mock bit set, \textsc{MockDetector} will deduce that the call on line~\ref{line:lis3line9} is a mock invocation. This implies that the call to method \textit{foo()} on line 11 in Figure~\ref{fig:mockMethodIllustration} cannot be a focal method.
+On the other hand, our imperative analysis sees mock creation API \texttt{<org.mockito.Mockito: java.lang.Object \\ mock(java.lang.Class)>} on line~\ref{line:lis3line6} in the Jimple IR. It thus adds a mapping from local variable \texttt{r2} to a new \texttt{MockStatus} with mock bit set to true. Because \texttt{r2} has a mapping in the abstraction with mock bit set, \textsc{MockDetector} will deduce that the call on line~\ref{line:lis3line9} is a mock invocation. This implies that the call to method \textit{foo()} on line 11 in Figure~\ref{fig:mockMethodIllustration} cannot be a focal method.
 
 
 \paragraph{Basic declarative analysis} Again referring to IR Listing~\ref{lis:mockMethodIllustrationIR}, this time we ask whether the call on IR line~\ref{line:lis3line9} satisfies predicate \texttt{isMockInvocation} (facts Listing~\ref{lis:facts}, line~\ref{line:facts-imi}), which we define to hold the analysis result (all mock invocation sites in the program). It does, because of facts lines~\ref{line:facts-vmi}--\ref{line:facts-imv}: IR line~\ref{line:lis3line9} contains a virtual method invocation, and receiver \texttt{r2} for the invocation on that line satisfies our predicate \texttt{isMockVar}, which holds all mock-containing variables in the program (Section~\ref{sec:dec-doop} provides more details). Predicate \texttt{isMockVar} holds because of lines~\ref{line:facts-arv}--\ref{line:facts-cms}: \texttt{r2} satisfies \texttt{isMockVar} because IR line~\ref{line:lis3line6} assigns \texttt{r2} the return value from mock source method \texttt{createMock} (facts line~\ref{line:facts-arv}), and the call to \texttt{createMock} satisfies predicate \texttt{callsMockSource} (facts line~\ref{line:facts-cms}), which requires that the call destination \texttt{createMock} be enumerated as a constant in our 1-ary relation \texttt{MockSourceMethod} (facts line~\ref{line:facts-msm}), and that there be a call graph edge between the method invocation at line~\ref{line:lis3line6} and the mock source method (facts line~\ref{line:facts-cge}).

@@ -42,7 +42,7 @@ from the test case. Thus, with the assistance of \textsc{MockDetector}, \texttt{
 For this unit test, since Ghafari's algorithm does not consider accessors (``inspector methods'' in their paper) as focal methods, they will presumably report no focal method for this unit test case. Ghafari's algorithm drops recall here.
 Incidentally, since Ghafari's heuristic requires the unit test case to have at least one assertion statement, the algorithm will presumably fail to return any focal methods when analyzing unit test cases without assertions.
 
-As for the heuristic for methods2test, method \texttt{getToolChainsForType()} does not appear to match under the name-based heuristic from methods2test. The other heuristic finds calls to the focal class, so methods2test should identify the call to \texttt{getToolChainsForType()} with that heuristic. Our mock analysis can help with that heuristic by removing mocks from the set of eligible focal classes.
+As for the heuristic for methods2test, method \texttt{getTool\\ChainsForType()} does not appear to match under the name-based heuristic from methods2test. The other heuristic finds calls to the focal class, so methods2test should identify the call to \texttt{getToolChainsForType()} with that heuristic. Our mock analysis can help with that heuristic by removing mocks from the set of eligible focal classes.
 
 \begin{table*}
 	\centering

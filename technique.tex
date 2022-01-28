@@ -21,7 +21,7 @@ Both analyses support arrays, containers, and fields. Although declarative analy
 
 % Mock Libraries discussed in Common Infrastructure section, perhaps refer to the paragraph in Common Infrastructure section?
 The implementation declares facts for 9 mock source methods manually gleaned from the mock libraries' documentation, as specified through method signatures (e.g. 
-\texttt{<org.mockito.Mockito: java.lang.Object mock(java.lang.Class)>}.)
+\texttt{<org.mockito.\\Mockito: java.lang.Object mock(java.lang.Class)>}.)
 It then declares that a variable {\tt v} satisfies \verb+isMockVar(v)+ if it is assigned from the return value of a mock source, or otherwise traverses the program's interprocedural control-flow graph, through assignments, which may possibly flow through fields, collections, or arrays. Finally, an invocation site is a mock invocation if the receiver object {\tt v} satisfies \verb+isMockVar(v)+.
 
 \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,label={lst:core},caption={Selected rules for Datalog mock analysis}]
@@ -37,7 +37,7 @@ isMockVar(v) :- isMockVar(v1),
   AssignLocal(v1, v, _).
 \end{lstlisting}
 
-The Doop-provided predicates \texttt{AssignReturnValue}, \texttt{AssignCast}, and \texttt{AssignLocal} resemble Java bytecode instructions; for instance, \texttt{AssignLocal(?from:Var, ?to:Var, ?inmethod:Method)} is an assignment statement copying from variable \texttt{?from} to \texttt{?to} in method \texttt{?inmethod}. (It is Datalog convention to prefix parameters with \texttt{?}s).
+The Doop-provided predicates \texttt{AssignReturnValue}, \\\texttt{AssignCast}, and \texttt{AssignLocal} resemble Java bytecode instructions; for instance, \texttt{AssignLocal(?from:Var, ?to:Var, \\?inmethod:Method)} is an assignment statement copying from variable \texttt{?from} to \texttt{?to} in method \texttt{?inmethod}. (It is Datalog convention to prefix parameters with \texttt{?}s).
 
 We designed the analysis in a modular fashion, such that the interprocedural, collections, arrays, and fields support can all be disabled through the use of \verb+#ifdef+s, which can be specified on the Doop command-line.
 
@@ -61,9 +61,9 @@ isInterprocMockVar(v_callee) :- isMockVar(v),
   Method_DeclaringType(callee, callee_class),
   ApplicationClass(callee_class).
 \end{lstlisting}
-We use Doop's call graph edges (\texttt{mainAnalysis.CallGraphEdge}) between the method invocation {\tt mi} and its callee {\tt callee}; the first rule propagates information from callees back to their callers, while the second rule propagates information from callers to callees through parameters. We restrict our analysis to so-called ``application classes'', excluding in particular the Java standard library. We chose to run our context-insensitive analysis on top of Doop's context-insensitive call graph. Mirroring Doop itself, it would also be possible to add context sensitivity to our analysis, potentially reducing the number of false positives.%, but our results suggest that this would not help much; we'll return to that point in Section~\ref{sec:evaluation}.
+We use Doop's call graph edges (\texttt{mainAnalysis.CallGraph\\Edge}) between the method invocation {\tt mi} and its callee {\tt callee}; the first rule propagates information from callees back to their callers, while the second rule propagates information from callers to callees through parameters. We restrict our analysis to so-called ``application classes'', excluding in particular the Java standard library. We chose to run our context-insensitive analysis on top of Doop's context-insensitive call graph. Mirroring Doop itself, it would also be possible to add context sensitivity to our analysis, potentially reducing the number of false positives.%, but our results suggest that this would not help much; we'll return to that point in Section~\ref{sec:evaluation}.
 
-\paragraph{Arrays and Containers} We record local variables pointing to mock-containing arrays using  {\tt isArrayLocalThatContainsMocks}. This predicate is true whenever the program under analysis stores a mock variable into an array; we also transfer array-mockness through assignments and casts. When a local variable \texttt{v} is read from a mock-containing array \texttt{c}, then \texttt{v} is marked as a mock variable, as seen in the first rule below. A store of a mock variable \texttt{mv} into an array \texttt{c} causes that array to be \texttt{isArrayLocalThatContainsMocks}. Note that these predicates are mutually-recursive. 
+\paragraph{Arrays and Containers} We record local variables pointing to mock-containing arrays using  {\tt isArrayLocalThatContains\\Mocks}. This predicate is true whenever the program under analysis stores a mock variable into an array; we also transfer array-mockness through assignments and casts. When a local variable \texttt{v} is read from a mock-containing array \texttt{c}, then \texttt{v} is marked as a mock variable, as seen in the first rule below. A store of a mock variable \texttt{mv} into an array \texttt{c} causes that array to be \texttt{isArrayLocalThatContainsMocks}. Note that these predicates are mutually-recursive. 
 
 \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,caption={Rules for handling arrays.}]
 // v = c[idx]
@@ -79,7 +79,7 @@ isArrayLocalThatContainsMocks(c) :-
 
 We treat collections analogously. However, while there is one API for arrays---bytecode array load and store instructions---Java's Collections APIs include, by our count, 60 relevant methods. We support iterators, collection copies via constructors, and add-all methods. We use our classification of collection methods to identify collection reads and writes and handle them as we do array reads and writes. We also handle {\tt Collection.toArray} by propagating mockness from the collection to the array.%, except that we say that it is a mock-containing collection, not a mock-containing array.
 
-\paragraph{Fields} Apart from the obvious rule stating that a field which is assigned from a mock satisfies {\tt fieldContainsMock}, we also label fields that have the {\tt org.mockito.Mock} or {\tt org.easyMock.Mock} annotations as mock-containing. We declare that a given field \emph{signature} may contain a mock, i.e. the field with a given signature belonging to all objects of a given type. We also support containers stored in fields.
+\paragraph{Fields} Apart from the obvious rule stating that a field which is assigned from a mock satisfies {\tt fieldContainsMock}, we also label fields that have the {\tt org.mockito.Mock} or \\{\tt org.easyMock.Mock} annotations as mock-containing. We declare that a given field \emph{signature} may contain a mock, i.e. the field with a given signature belonging to all objects of a given type. We also support containers stored in fields.
 
 \paragraph{Arrays and Fields} We also support not just array locals but also array fields. That is, when an array-typed field is assigned from a mock-containing array local, then it is also a mock. And when an array-typed local variable is assigned from a mock-containing array field, then that array local is a mock-containing array.
 
@@ -288,7 +288,7 @@ JUnit tests are simply methods that developers write in test classes, appropriat
 
 % what about hierarchical drivers?
 
-Thus, to enable static analysis over a benchmark's test suite, our tool uses Soot to generate a driver class for each Java sub-package of the suite (e.g. \texttt{org.apache.ibatis.executor.statement}). In each of these sub-package driver classes, our tool creates a \textit{runall()} method, which invokes all methods within the sub-package that JUnit considers tests, as well as non-constructor test cases, all surrounded by calls to class-level init/setup and teardown methods. Concrete test methods are particularly easy to call from a driver, as they are specified to have no parameters and are not supposed to rely on any particular ordering. 
+Thus, to enable static analysis over a benchmark's test suite, our tool uses Soot to generate a driver class for each Java sub-package of the suite (e.g. \texttt{org.apache.ibatis.\\executor.statement}). In each of these sub-package driver classes, our tool creates a \textit{runall()} method, which invokes all methods within the sub-package that JUnit considers tests, as well as non-constructor test cases, all surrounded by calls to class-level init/setup and teardown methods. Concrete test methods are particularly easy to call from a driver, as they are specified to have no parameters and are not supposed to rely on any particular ordering. 
 Our tool then creates a RootDriver class at the root package level, which invokes the \textit{runall()} method in each sub-package driver class, along with the \texttt{@Test}/\texttt{@Before}/\texttt{@After} methods found in classes located at the root. The drivers that we generate also contain code to catch all checked exceptions declared to be thrown by the unit tests. Both our Soot and Doop implementations use the generated driver classes.
 
 All static frameworks must somehow approximate the set of entry points as appropriate for their targets. For instance, the Wala framework~\cite{wala19:_t} also creates synthetic entry points, but it does this to perform pointer analysis on a program's main code rather than to enumerate the program's test cases.
