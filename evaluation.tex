@@ -29,7 +29,7 @@ We now quantitatively characterize the performance of our mock analysis implemen
 
 \begin{table*}
 	\centering
-	\caption{Counts of Test-Related (Test/Before/After) methods in public concrete test classes, along with counts of mocks, mock-containing arrays, mock-containing collections, and total number of field mock objects reported by Soot intraprocedural analysis.}
+	\caption{Counts of Test-Related (Test/Before/After) methods in public concrete test classes; counts of mocks, mock-containing arrays, mock-containing collections; and total number of field mock objects reported by Soot intraprocedural analysis.}
 	%	\begin{adjustbox}{width=0.1\textwidth}
 	\begin{tabular}{lrrrrr}
 		\toprule
@@ -53,7 +53,7 @@ We now quantitatively characterize the performance of our mock analysis implemen
 
 \begin{table*}
 	\centering
-	\caption{Comparison of Number of InstanceInvokeExprs on Mock objects analyzed by Soot and Doop, \hspace{\textwidth}and Total Number of InstanceInvokeExprs, in each benchmark's test suite.}
+	\caption{Total \# of InstanceInvokeExprs, and \# of InstanceInvokeExprs with Mock receivers found by Soot and Doop.}
 	%	\begin{adjustbox}{width=0.1\textwidth}
 	\begin{tabular}{lrrrr}
 		\toprule
@@ -124,24 +124,6 @@ We now quantitatively characterize the performance of our mock analysis implemen
 %	\label{tab:doop-runtimes}
 %\end{table*}
 
-\begin{table*}
-	\centering
-	\caption{Comparison of Statement Coverage and Branch Coverage with all test cases, \hspace{\textwidth} and with test cases excluding intraprocedural mock invocations.}
-	\vspace*{.5em}
-	\begin{tabular}{lrrrrr} \toprule
-		& \multicolumn{2}{c}{Statement Coverage} & & \multicolumn{2}{c}{Branch Coverage} \\
-		\cmidrule{2-3} \cmidrule{5-6}
-		\thead{Benchmark} & \thead{All Test Cases} & \thead{Test Cases without \\ Intraproc Mocks} & & \thead{All Test Cases} & \thead{Test Cases without \\ Intraproc Mocks} \\ 
-		\midrule
-		
-		jsonschema2pojo-core-1.1.1  & 37\%  & 24\% & & 33\%    &  19\%     \\
-		maven-core-3.8.1   		    & 48\%  & 48\% & & 39\%    &  38\%       \\
-		mybatis-3.5.6   		    & 85\%  & 81\% & &  82\%    &  76\%        \\
-		vraptor-core-3.5.5         	& 87\%  & 59\% & & 81\%   &  56\%    \\
-		\bottomrule
-	\end{tabular}
-	\label{tab:test-coverages}
-\end{table*}
 
 
 %\begin{table*}
@@ -213,7 +195,7 @@ Table~\ref{tab:invokes} is the core result about our mock analyses. It presents 
 
 In Section~\ref{sec:common} we discussed the implementation of our intraprocedural and interprocedural analyses. We can now discuss the effects of these implementation choices on the experimental results. Recall that we chose, unsoundly, to not propagate any information across method calls in the intraprocedural analysis. Thus, the intraproc columns in Table~\ref{tab:invokes} show smaller numbers than the interproc columns, as expected. Note also that there is a sometimes drastic increase from the intraprocedural to the interprocedural result, e.g. from 40 to 1300 for \textsc{flink}. This is because mocks can propagate from tests to the methods that they call and all around the main program code. It would be desirable to be able to differentiate test helper methods, which we want to propagate mocks to, from methods in the main program, which we generally do not want to propagate mocks to; however, Doop treats test and main code identically.
 
-One type of false negative in the intraprocedural analysis that we specifically point out is due to lambda expressions. Mockness should propagate to lambda expressions but that requires an interproecdural analysis. The Doop interprocedural implementation finds these mocks.
+One false negative in the intraprocedural analysis that we specifically point out is due to lambda expressions. Mockness should propagate to lambdas, but that requires an interprocedural analysis. % The Doop interprocedural implementation [should] finds these mocks.
 
 \begin{mdframed}[
 	leftmargin=\parindent,
@@ -221,14 +203,16 @@ One type of false negative in the intraprocedural analysis that we specifically 
 	skipabove=\topsep,
 	skipbelow=\topsep
 	]
-	{\bf Finding 3:} Interprocedural analysis finds from 1.07$\times$ to 34$\times$ more mock invocations than intraprocedural analysis, but that number includes potential mock calls in the main program.
+	{\bf Finding 3:} Interprocedural analysis finds from 1.07$\times$ to 34$\times$ more mock invocations than intraprocedural analysis.
 \end{mdframed}
 
 We have successfully executed our Doop analysis with different base (pointer) analyses. We reported numbers for the context-insensitive base analysis here as it matches our own mock analysis. (It would also be possible, with much more effort, to adapt our analysis to carry around context.)
 
-\paragraph{Validation} In Section~\ref{subsec:analysis-design} we discussed possible sources of imprecision for our static analysis; our analysis could be subject to false positives (loss of precision due to reported mocks that aren't) or false negatives (unsoundness due to unreported mocks). Cross-checking the results revealed that the two approaches have similar precision in detecting intraprocedural mock invokes. We observed some false negatives in the Soot implementation (fewer than 1\%, mostly due to missing support for \texttt{PriorityQueue} and \texttt{TreeSet}). The implementations also differ because Soot does not identify mock invocations in abstract test classes, constructors, or methods not labelled as tests. False negatives common to the two implementations are harder to detect.
+\paragraph{Imprecision and Unsoundness in Practice.} In Section~\ref{subsec:analysis-design} we discussed possible sources of imprecision for our static analysis; our analysis could be subject to false positives (loss of precision due to reported mocks that aren't) or false negatives (unsoundness due to unreported mocks). Cross-checking the results revealed that the two approaches have similar precision in detecting intraprocedural mock invokes. We observed some false negatives in the Soot implementation (fewer than 1\%, mostly due to missing support for \texttt{PriorityQueue} and \texttt{TreeSet}). The implementations also differ because Soot does not identify mock invocations in abstract test classes, constructors, or methods not labelled as tests. False negatives common to the two implementations are harder to detect.
 
-After a manual inspection of our \textsc{bootique} benchmark showed zero false positives on that benchmark, we realized that dataflow analysis on test code is likely to have far fewer false positives than on arbitrary code, because it does not have many control-flow merges. We thus instrumented our Soot analysis implementations to count the number of merges where our static analysis must approximate. Among the 1,084 test-related methods in our benchmark suite that contain intraprocedural mocks, only 23 of them have merges (conditionals, loops or try-catch blocks) with different information on the two incoming branches.  An exhaustive manual inspection of the 23 methods showed that our analysis reports \emph{zero} false positive mock objects or mock invocations due to dataflow merges on our benchmark set.
+After a manual inspection of our \textsc{bootique} benchmark showed zero false positives on that benchmark, we realized that dataflow analysis on test code is likely to have far fewer false positives than on arbitrary code, because it does not have many control-flow merges. We thus instrumented our Soot analysis implementations to count the number of merges where our static analysis must approximate. Among the 1,084 test-related methods in our benchmark suite that contain intraprocedural mocks, only 23 of them have merges (conditionals, loops or try-catch blocks) with different information on the two incoming branches.  {\bf An exhaustive manual inspection of the 23 methods showed that our analysis reports \emph{zero} false positive mock objects or mock invocations due to dataflow merges on our benchmark set.}
+
+We have not quantified imprecision due to arrays, fields, and collections; however, we would be surprised if it were important to a client of our analysis that an object from an array, field, or collection could potentially be either mock or non-mock. Most of the time, such an object should be treated as a mock.
 
 
 %\paragraph{Field Mocks Results} We perform an evaluation on the necessity of our pre-analyses finding field mocks. 
@@ -248,9 +232,28 @@ After a manual inspection of our \textsc{bootique} benchmark showed zero false p
 %\end{mdframed}
 %We can deduce that our pre-analysis for field mocks described in Section~\ref{subsubsec:pre-analysis} is required for analyzing mocks in  test suites.
 
-\subsection{Application: Mocks contribute to coverage} Since our mock analysis identifies mock objects, we are in a position to empirically evaluate the importance of mock objects in our benchmarks' test suites. One measure of their importance is how much they contribute to code coverage. Using jacoco with the surefire Maven plugin, we measured branch and statement coverage for 4 of our benchmarks, both with and without test cases that contain intraprocedural mock invocations. We excluded intraprocedural mocks by generating custom Maven test execution commandlines.
+\subsection{Application: Mocks contribute to coverage} Since our mock analysis identifies mock objects, we are in a position to empirically evaluate the importance of mock objects in our benchmarks' test suites. One measure of their importance is how much they contribute to code coverage. Using jacoco with the surefire Maven plugin, we measured branch and statement coverage for 4 of our benchmarks (the ones with nontrivial mock usage, excluding one benchmark with parametrized test cases), both with and without test cases that contain intraprocedural mock invocations. We excluded intraprocedural mocks (on a per-test-case granularity) by generating custom Maven test execution commandlines.
 
-Table~\ref{tab:test-coverages} presents our results. We can see that for benchmarks \textsc{jsonschema2pojo-core} and \textsc{vraptor-core}, which have about 15\% mock invocations, statement coverage drops by over 13 to 28 percentage points when excluding intraprocedural mocks. The fact that a correlation exists may be unsurprising, but the magnitude of the 28 point gap of statement coverage for \textsc{vraptor-core} is striking, and points out that the mock objects are pulling more than their weight in terms of coverage. These coverage numbers suggest that mock objects may play a key role in test suites. Correctly tracing mock objects and invocations could provide better insights about benchmarks relying on mock objects for testing. For instance, with mock objects correctly identified, developers could easily find out which lines of their code are only executed in mock-using test cases. Note that our analysis, or a dynamic version thereof, is required to collect these numbers.
+\begin{table*}
+	\centering
+	\caption{Comparison of Statement Coverage and Branch Coverage with all test cases, \hspace{\textwidth} and with only test cases that do not contain intraprocedural mock invocations.}
+	\vspace*{.5em}
+	\begin{tabular}{lrrrrr} \toprule
+		& \multicolumn{2}{c}{Statement Coverage} & & \multicolumn{2}{c}{Branch Coverage} \\
+		\cmidrule{2-3} \cmidrule{5-6}
+		\thead{Benchmark} & \thead{All Test Cases} & \thead{Test Cases without \\ Intraproc Mocks} & & \thead{All Test Cases} & \thead{Test Cases without \\ Intraproc Mocks} \\ 
+		\midrule
+		
+		jsonschema2pojo-core-1.1.1  & 37\%  & 24\% & & 33\%    &  19\%     \\
+		maven-core-3.8.1   		    & 48\%  & 48\% & & 39\%    &  38\%       \\
+		mybatis-3.5.6   		    & 85\%  & 81\% & &  82\%    &  76\%        \\
+		vraptor-core-3.5.5         	& 87\%  & 59\% & & 81\%   &  56\%    \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:test-coverages}
+\end{table*}
+
+Table~\ref{tab:test-coverages} presents our results. We can see that for benchmarks \textsc{jsonschema2pojo-core} and \textsc{vraptor-core}, which have about 15\% mock invocations, statement coverage drops by over 13 to 28 percentage points when excluding intraprocedural mocks. The fact that a correlation exists may be unsurprising, but the magnitude of the 28 point gap of statement coverage for \textsc{vraptor-core} is striking, and points out that the mock objects are indispensable in achieving coverage. We conclude that mock objects play a key role in test suites. Correctly tracing mock objects and invocations could provide better insights about benchmarks relying on mock objects for testing. For instance, with mock objects correctly identified, developers could easily find out which lines of their code are only executed in mock-using test cases. Note that our analysis, or a dynamic version thereof, is required to collect these numbers.
 
 \begin{mdframed}[
 	leftmargin=\parindent,

@@ -311,8 +311,8 @@ Approximations may result in false positives (threatening precision), while miss
 \item At method boundaries (formal parameters, return values), our intraprocedural implementations assume that incoming values are not mocks (unless a return value from a Collections API), while the Doop interprocedural implementation uses a context-insensitive approximation. The not-mock assumption may result in false negatives for Soot; extraneous call-graph edges may result in Doop interprocedural false positives. (Lambdas are implemented using method calls and result in intraprocedural false negatives.)
 \item Arrays, fields, and collections are approximated such that if any mock is stored in the array, field, or collection, then all values coming from there are mocks; we are subject to false positives if arrays, fields or collections are heterogeneous over time or space.
 \item Although we have manually categorized collection APIs and mock APIs, it is possible that our enumeration is incomplete, leading to false negatives.
-  Soot also assumes that developers do not call inherited versions of mock creation sites (e.g. a wrapper of the mock source method). Doop's interprocedural analysis can and does detect such mock creations (fewer than 5).
-  Our approach cannot detect when subjects build their own mocks; however, those are more likely to be stubs or fakes than true mocks~\cite{fowler07:_mocks_arent_stubs}. 
+  Soot also assumes that developers do not call inherited versions of mock creation sites (e.g. a wrapper of the mock source method). Doop's interprocedural analysis does detect such mock creations (fewer than 5).
+  Our approach cannot detect when subjects build their own mocks; however, those are more likely to be stubs or fakes~\cite{fowler07:_mocks_arent_stubs} than true mocks. 
   \item As usual, our static analysis approach assumes that it has access to all of the program source; missing code (e.g. dynamically loaded) may result in false negatives.
 \end{itemize}
 
