@@ -257,16 +257,16 @@ Table~\ref{tab:test-coverages} presents our results. We can see that for benchma
 \end{mdframed}
 
 \paragraph{Sources of Imprecision} 
-We have implemented counters in merge function to quantify the possible source of imprecision from incoming branches in our may-analysis. Among the 1,084 test-related methods that contains intraprocedural mocks, 23 of them uses conditionals, loops or try-catch blocks.  Manual inspections suggest that % ... to be added
+In Section~\ref{subsec:analysis-design} we discussed possible sources of imprecision for our static analysis. After a manual inspection of our \textsc{bootique} benchmark showed zero false positives on that benchmark, we realized that dataflow analysis on test code is likely to have far fewer false positives than on arbitrary code, because it does not have many control-flow merges. We thus instrumented our analysis to count the number of merges where our static analysis must approximate. Among the 1,084 test-related methods in our benchmark suite that contain intraprocedural mocks, only 23 of them have merges (conditionals, loops or try-catch blocks) with different information on the two incoming branches.  Manual inspections suggest that % ... to be added
 
-\begin{mdframed}[
-	leftmargin=\parindent,
-	rightmargin=\parindent,
-	skipabove=\topsep,
-	skipbelow=\topsep
-	]
-	{\bf Finding 5:} About 2\% of intraprocedural mock-containing test related methods uses branches. % ... to be added
-\end{mdframed}
+%% \begin{mdframed}[
+%% 	leftmargin=\parindent,
+%% 	rightmargin=\parindent,
+%% 	skipabove=\topsep,
+%% 	skipbelow=\topsep
+%% 	]
+%% 	{\bf Finding 5:} About 2\% of intraprocedural mock-containing test related methods uses branches. % ... to be added
+%% \end{mdframed}
 
 %--- , indicates the removal of mock invocations from call graph would improve the call graph's accuracy on method coverage for the benchmarks on the high end of the mock invocation percentage. 
 
