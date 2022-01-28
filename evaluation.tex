@@ -5,7 +5,7 @@ We now quantitatively characterize the performance of our mock analysis implemen
 
 \begin{table*}
 	\centering
-	\caption{Our suite of 8 open-source benchmarks (8000--117000 LOC) plus our microbenchmark. Soot and Doop analysis run-times.}
+	\caption{Our suite of 8 open-source benchmarks (8,000--117,000 LOC) plus our microbenchmark. Soot and Doop analysis run-times.}
 	%	\begin{adjustbox}{width=0.1\textwidth}
 	\resizebox{.95\textwidth}{!}{\begin{tabular}{lrrrrrrr}
 			\toprule
@@ -254,6 +254,18 @@ Table~\ref{tab:test-coverages} presents our results. We can see that for benchma
 	skipbelow=\topsep
 	]
 	{\bf Finding 4:} Test suites use mocks to increase statement coverage by 13--28\% versus not using mocks.
+\end{mdframed}
+
+\paragraph{Sources of Imprecision} 
+We have implemented counters in merge function to quantify the possible source of imprecision from incoming branches in our may-analysis. Among the 1,084 test-related methods that contains intraprocedural mocks, 23 of them uses conditionals, loops or try-catch blocks.  Manual inspections suggest that % ... to be added
+
+\begin{mdframed}[
+	leftmargin=\parindent,
+	rightmargin=\parindent,
+	skipabove=\topsep,
+	skipbelow=\topsep
+	]
+	{\bf Finding 5:} About 2\% of intraprocedural mock-containing test related methods uses branches. % ... to be added
 \end{mdframed}
 
 %--- , indicates the removal of mock invocations from call graph would improve the call graph's accuracy on method coverage for the benchmarks on the high end of the mock invocation percentage. 
