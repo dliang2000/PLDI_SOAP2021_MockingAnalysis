@@ -1,7 +1,7 @@
 \begin{abstract}
 Unit testing is a widely used tool in modern software development processes. A well-known issue in writing tests is handling dependencies: creating usable objects for dependencies is often complicated. Developers must therefore often introduce mock objects to stand in for dependencies during testing. 
 
-We believe that the static analysis of test suites can enable developers to better characterize the behaviours of existing test suites, thus guiding further test suite analysis and manipulation. However, because mock objects are created using reflection, they confound existing static analysis techniques. At present, it is impossible to statically distinguish methods invoked on mock objects from methods invoked on real objects. 
+We believe that the static analysis of test suites can enable developers to better understand and maintain existing test suites. However, because mock objects are created using reflection, they confound existing static analysis techniques. At present, it is impossible to statically distinguish methods invoked on mock objects from methods invoked on real objects. 
 
 Researchers have started to build static analyses and developer tools for manipulating test cases. However, such tools currently cannot determine which dependencies' methods are actually tested, versus mock methods being called. As a specific example, removing confounding mock invocations from consideration as focal methods can improve the precision of analyses to detect focal methods under test, which is useful in itself and also a key prerequisite to further analysis of test cases.
 
