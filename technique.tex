@@ -24,7 +24,8 @@ The implementation declares facts for 9 mock source methods manually gleaned fro
 \texttt{<org.mockito.\\Mockito: java.lang.Object mock(java.lang.Class)>}.)
 It then declares that a variable {\tt v} satisfies \verb+isMockVar(v)+ if it is assigned from the return value of a mock source, or otherwise traverses the program's interprocedural control-flow graph, through assignments, which may possibly flow through fields, collections, or arrays. Finally, an invocation site is a mock invocation if the receiver object {\tt v} satisfies \verb+isMockVar(v)+.
 
-\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,label={lst:core},caption={Selected rules for Datalog mock analysis}]
+\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,label={lst:core},caption={Selected rules for Datalog mock analysis},
+basicstyle=\scriptsize\ttfamily, framesep=4.5mm, framexleftmargin=1.0mm, captionpos=b, label=lis:datalog-rule, escapechar=!]
 // v = mock()
 isMockVar(v) :-
   AssignReturnValue(mi, v),
@@ -44,7 +45,8 @@ We designed the analysis in a modular fashion, such that the interprocedural, co
 \paragraph{Interprocedural support}
 As mentioned above, it was quite easy to implement interprocedural analysis in our Doop implementation; we leveraged Doop's call graph and simply propagated mockness information along its call graph edges.
 
-\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,caption={Two rules give interprocedural analysis in Doop.}]
+\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,caption={Two rules give interprocedural analysis in Doop.},
+basicstyle=\scriptsize\ttfamily, framesep=4.5mm, framexleftmargin=1.0mm, captionpos=b, label=lis:interproc-rule, escapechar=!]
 // v = callee(), where callee's return var is mock
 isInterprocMockVar(v) :-
   AssignReturnValue(mi, v),
@@ -65,7 +67,8 @@ We use Doop's call graph edges (\texttt{mainAnalysis.CallGraph\\Edge}) between t
 
 \paragraph{Arrays and Containers} We record local variables pointing to mock-containing arrays using  {\tt isArrayLocalThatContainsMocks}. This predicate is true whenever the program under analysis stores a mock variable into an array; we also transfer array-mockness through assignments and casts. When a local variable \texttt{v} is read from a mock-containing array \texttt{c}, then \texttt{v} is marked as a mock variable, as seen in the first rule below. A store of a mock variable \texttt{mv} into an array \texttt{c} causes that array to be \texttt{isArrayLocalThatContainsMocks}. Note that these predicates are mutually-recursive. 
 
-\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,caption={Rules for handling arrays.}]
+\begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,caption={Rules for handling arrays.},
+basicstyle=\scriptsize\ttfamily, framesep=4.5mm, framexleftmargin=1.0mm, captionpos=b, label=lis:array-rule, escapechar=!]
 // v = c[idx]
 isMockVar(v) :-
   isArrayLocalThatContainsMocks(c),
@@ -297,7 +300,6 @@ All static frameworks must somehow approximate the set of entry points as approp
 
 %% \paragraph{Mock Libraries}
 %% Our supported mock libraries take different approaches to instantiating mocks. All of the libraries have methods that generate mock objects; for instance, EasyMock contains the \texttt{createMock()} method. We consider return values from these methods to be mock objects. Additionally, Mockito contains a fluent \texttt{verify()} method which returns a mock object. Finally, Mockito and EasyMock also allow developers to mark fields as \texttt{@Mock}; we treat reads from such fields as mock objects. Both implementations start the analysis with these hard coded facts on mock source methods, as described in the mock libraries' documentation.
-
 \subsection{Analysis Design Considerations}
 \label{subsec:analysis-design}
 \paragraph{Static vs Dynamic Analysis}
