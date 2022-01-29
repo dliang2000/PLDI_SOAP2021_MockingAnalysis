@@ -193,7 +193,35 @@ Table~\ref{tab:invokes} is the core result about our mock analyses. It presents 
 
 %--- discuss the numbers for the interprocedural analysis.
 
-In Section~\ref{sec:common} we discussed the implementation of our intraprocedural and interprocedural analyses. We can now discuss the effects of these implementation choices on the experimental results. Recall that we chose, unsoundly, to not propagate any information across method calls in the intraprocedural analysis. Thus, the intraproc columns in Table~\ref{tab:invokes} show smaller numbers than the interproc columns, as expected. Note also that there is a sometimes drastic increase from the intraprocedural to the interprocedural result, e.g. from 40 to 1300 for \textsc{flink}. This is because mocks can propagate from tests to the methods that they call and all around the main program code. It would be desirable to be able to differentiate test helper methods, which we want to propagate mocks to, from methods in the main program, which we generally do not want to propagate mocks to; however, Doop treats test and main code identically.
+In Section~\ref{sec:common} we discussed the implementation of our intraprocedural and interprocedural analyses. We can now discuss the effects of these implementation choices on the experimental results. Recall that we chose, unsoundly, to not propagate any information across method calls in the intraprocedural analysis. Thus, the intraproc columns in Table~\ref{tab:invokes} show smaller numbers than the interproc columns, as expected. Note also that there is a sometimes drastic increase from the intraprocedural to the interprocedural result, e.g. from 40 to 1300 for \textsc{flink}. This is because mocks can propagate from tests to the methods that they call and all around the main program code. 
+
+We investigated the 23 additional interprocedural mocks in \textsc{bootique}. Here, the intraprocedural analysis does not miss any mock invocations in tests. Listing~\ref{lis:bootiqueMockCall} illustrates. \texttt{mockParsed.valueOf()} is a mock invocation. \texttt{opts.optionStrings()} is not; there is a real \texttt{opts} object. But in \texttt{optionStrings()} there is a call to method \texttt{optionSet.values()}. Our interprocedural analysis put \texttt{optionSet} as a mock field when it analyzed the constructor, and then flagged the call to \texttt{optionSet.values()} as a mock, while the intraprocedural analysis assumed that the constructor got no mock parameters, and hence does not put the field as mock.
+
+\begin{lstlisting}[basicstyle=\ttfamily, caption={An interprocedural mock invocation from boutique's \texttt{JoptCliTest}.},
+basicstyle=\scriptsize\ttfamily,language = Java, framesep=4.5mm, escapechar=|,
+framexleftmargin=1.0mm, captionpos=b, label=lis:bootiqueMockCall, morekeywords={@Test}]
+// JoptCliTest, modified to use @Mock vs @Before
+@Mock private OptionSet mockParsed;
+
+@Test public void testStringsFor_Missing() {
+  when(mockParsed.valueOf(anyString())).
+      thenReturn(Collections.emptyList());
+
+  JoptCli opts = new JoptCli(mockParsed, "aname");
+  assertNotNull(opts.optionStrings("no_such_opt"));
+  /* ... */ }
+
+// JoptCli
+private OptionSet optionSet;
+private String commandName;
+
+public JoptCli(OptionSet parsed, String commandName) {
+  this.optionSet = parsed; this.commandName = commandName; }
+
+@Override public List<String> optionStrings(String name) {
+  return /* mock */ optionSet.valuesOf(name).stream()
+      .map(String::valueOf).collect(toList()); }
+\end{lstlisting}
 
 One false negative in the intraprocedural analysis that we specifically point out is due to lambda expressions. Mockness should propagate to lambdas, but that requires an interprocedural analysis. The Doop interprocedural implementation finds these mocks.
 
@@ -207,45 +235,6 @@ One false negative in the intraprocedural analysis that we specifically point ou
 \end{mdframed}
 
 We have successfully executed our Doop analysis with different base (pointer) analyses. We reported numbers for the context-insensitive base analysis here as it matches our own mock analysis. (It would also be possible, with much more effort, to adapt our analysis to carry around context.)
-
-\begin{lstlisting}[basicstyle=\ttfamily, caption={Code snippet from boutique's \texttt{JoptCliTest}, which Doop's interprocedural implementation detect mock call in the callee \texttt{optionStrings}.},
-basicstyle=\scriptsize\ttfamily,language = Java, framesep=4.5mm, escapechar=|,
-framexleftmargin=1.0mm, captionpos=b, label=lis:boutiqueMockCall, morekeywords={@Test}]
-private OptionSet mockParsed;
-
-@BeforeEach
-public void before() {
-  this.mockParsed = mock(OptionSet.class);
-}
-
-@Test
-public void testStringsFor_Missing() {
-  when(mockParsed.valueOf(anyString())).
-      thenReturn(Collections.emptyList());
-
-  JoptCli opts = new JoptCli(mockParsed, "aname");
-  assertNotNull(opts.optionStrings("no_such_opt"));
-  ...
-}
-
-
-// Code Snippet in JoptCli.java, where 
-// optionStrings() is implemented
-
-private OptionSet optionSet;
-private String commandName;
-
-public JoptCli(OptionSet parsed, String commandName) {
-  this.optionSet = parsed;
-  this.commandName = commandName;
-}
-
-@Override
-public List<String> optionStrings(String name) {
-  return optionSet.valuesOf(name).stream()
-      .map(String::valueOf).collect(toList());
-}
-\end{lstlisting}
 
 \paragraph{Imprecision and Unsoundness in Practice.} In Section~\ref{subsec:analysis-design} we discussed possible sources of imprecision for our static analysis; our analysis could be subject to false positives (loss of precision due to reported mocks that aren't) or false negatives (unsoundness due to unreported mocks). Cross-checking the results revealed that the two approaches have similar precision in detecting intraprocedural mock invokes. We observed some false negatives in the Soot implementation (fewer than 1\%, mostly due to missing support for \texttt{PriorityQueue} and \texttt{TreeSet}). The implementations also differ because Soot does not identify mock invocations in abstract test classes, constructors, or methods not labelled as tests. False negatives common to the two implementations are harder to detect.
 
@@ -292,7 +281,7 @@ We have not quantified imprecision due to arrays, fields, and collections; howev
 	\label{tab:test-coverages}
 \end{table*}
 
-Table~\ref{tab:test-coverages} presents our results. We can see that for benchmarks \textsc{jsonschema2pojo-core} and \textsc{vraptor-core}, which have about 15\% mock invocations, statement coverage drops by over 13 to 28 percentage points when excluding intraprocedural mocks. The fact that a correlation exists may be unsurprising, but the magnitude of the 28 point gap of statement coverage for \textsc{vraptor-core} is striking, and points out that the mock objects are indispensable in achieving coverage. We conclude that mock objects play a key role in test suites. Correctly tracing mock objects and invocations could provide better insights about benchmarks relying on mock objects for testing. For instance, with mock objects correctly identified, developers could easily find out which lines of their code are only executed in mock-using test cases. Note that our analysis, or a dynamic version thereof, is required to collect these numbers.
+Table~\ref{tab:test-coverages} presents our results. We can see that for benchmarks \textsc{jsonschema2pojo-core} and \textsc{vraptor-core}, which have about 15\% mock invocations, statement coverage drops by over 13 to 28 percentage points when excluding intraprocedural mocks. The fact that a relationship exists may be unsurprising, but the magnitude of the 28 point gap of statement coverage for \textsc{vraptor-core} is striking, and points out that the mock objects are indispensable in achieving coverage. We conclude that mock objects play a key role in test suites. Correctly tracing mock objects and invocations could provide better insights about benchmarks relying on mock objects for testing. For instance, with mock objects correctly identified, developers could easily find out which lines of their code are only executed in mock-using test cases. Note that our analysis, or a dynamic version thereof, is required to collect these numbers.
 
 \begin{mdframed}[
 	leftmargin=\parindent,
