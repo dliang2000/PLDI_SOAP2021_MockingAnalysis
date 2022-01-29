@@ -7,7 +7,7 @@ rely on other objects, particularly ones that are hard
 to build (e.g. databases; or that come from different components).
 
 While mock objects are an invaluable tool for developers, their use
-complicates the static analysis and manipulation of test case source code. 
+complicates the static analysis of test case source code. 
 Such static analyses can help IDEs provide better
 support to test case writers; enable better static estimation of test coverage
 (avoiding mocks); and detect focal methods in test cases. While researchers have
@@ -22,7 +22,7 @@ enable better understanding of a test case's behaviour.
 
 Mock objects are difficult to analyze statically because, at the bytecode level,
 a call to a mock object statically resembles a call to the real object (as
-intended by the designers of mock libraries).
+intended by the designers of mock libraries, and realized using reflection).
 A naive static analysis attempting to be sound would have to include all of 
 the possible behaviours of the actual object (rather than the mock) when analyzing such code. 
 Such potential but unrealizable behaviours obscure the true behaviour 
@@ -38,7 +38,7 @@ can ask whether a given variable in a test case contains a mock or not, and
 whether a given invocation site is a call to a mock object or not. We have
 evaluated \textsc{MockDetector} on a suite of 8 benchmarks plus a microbenchmark. 
 We have cross-checked results across the two implementations and manually inspected
-the results on our microbenchmark, to ensure that the results are as expected.
+the results on our microbenchmark and one of the real benchmarks.
 
 Taking a broader view, we believe that helper static analyses like \textsc{MockDetector} 
 can aid

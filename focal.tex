@@ -78,12 +78,12 @@ With the methods2test heuristics, \texttt{getToolChainsForType()} does not appea
   \label{fig:mockExampleEvaluation}
 \end{figure}
 
-\paragraph{Precision and Recall}
+\paragraph{MockDetector and focal method detection}
 We compare the static analysis and name-based approaches to detecting focal methods. Table~\ref{tab:focal-method-algorithm-comparison} presents an approximation to recall---the percentage of test cases reported as having focal methods by each of the approaches. This assumes every test case has exactly one focal method. (A test case may have more than one focal method; we believe that a reasonable test has at least one focal method.) The four projects presented under Ghafari's algorithm are from their paper~\cite{ghafari15:_autom}, whereas we hand-picked four benchmarks from methods2test's dataset to match (as far as possible) those in Ghafari's work.
 
 The data suggests that methods2test's name-based approach of focal method detection has low recall. This is not surprising---their heuristics have quite strict constraints, i.e. limited applicability. We reviewed their results and found that none of their reported focal method invocations were mocks, consistent with high precision.
 
-Ghafari kindly shared with us recent focal method detection results. the percentage of test cases where they report focal methods (a proxy to recall) is acceptable. Sometimes, their tool automatically reports a focal method that is actually a mock invocation from the developer's standpoint---\textsc{MockDetector} would help here. 
+Ghafari kindly shared with us recent focal method detection results. The percentage of test cases where they report focal methods (a proxy to recall) is reasonably high. Sometimes, their tool automatically reports a focal method that is actually a mock invocation from the developer's standpoint---\textsc{MockDetector} would help here. 
 %On the other hand, their algorithm would return no focal method for test cases that come with no assertion statements. 
 %Overall, Ghafari's algorithm would benefit from filters to increase precision, but 
 
