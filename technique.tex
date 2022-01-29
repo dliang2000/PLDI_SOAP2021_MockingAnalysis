@@ -38,7 +38,7 @@ isMockVar(v) :- isMockVar(v1),
   AssignLocal(v1, v, _).
 \end{lstlisting}
 
-The Doop-provided predicates \texttt{AssignReturnValue}, \\\texttt{AssignCast}, and \texttt{AssignLocal} resemble Java bytecode instructions; for instance, \texttt{AssignLocal(?from:Var, ?to:Var, \\?inmethod:Method)} is an assignment statement copying from variable \texttt{?from} to \texttt{?to} in method \texttt{?inmethod}. (It is Datalog convention to prefix parameters with \texttt{?}s).
+The Doop-provided predicates \texttt{AssignReturnValue}, \texttt{AssignCast}, and \texttt{AssignLocal} resemble Java bytecode instructions; for instance, \texttt{AssignLocal(?from:Var, ?to:Var, ?inmethod:Method)} is an assignment statement copying from variable \texttt{?from} to \texttt{?to} in method \texttt{?inmethod}. (It is Datalog convention to prefix parameters with \texttt{?}s).
 
 We designed the analysis in a modular fashion, such that the interprocedural, collections, arrays, and fields support can all be disabled through the use of \verb+#ifdef+s, which can be specified on the Doop command-line.
 
@@ -63,7 +63,7 @@ isInterprocMockVar(v_callee) :- isMockVar(v),
   Method_DeclaringType(callee, callee_class),
   ApplicationClass(callee_class).
 \end{lstlisting}
-We use Doop's call graph edges (\texttt{mainAnalysis.CallGraph\\Edge}) between the method invocation {\tt mi} and its callee {\tt callee}; the first rule propagates information from callees back to their callers, while the second rule propagates information from callers to callees through parameters. We restrict our analysis to so-called ``application classes'', excluding in particular the Java standard library. We chose to run our context-insensitive analysis on top of Doop's context-insensitive call graph. Mirroring Doop itself, it would also be possible to add context sensitivity to our analysis, potentially reducing the number of false positives.%, but our results suggest that this would not help much; we'll return to that point in Section~\ref{sec:evaluation}.
+We use Doop's call graph edges (\texttt{mainAnalysis.CallGraphEdge}) between the method invocation {\tt mi} and its callee {\tt callee}; the first rule propagates information from callees back to their callers, while the second rule propagates information from callers to callees through parameters. We restrict our analysis to so-called ``application classes'', excluding in particular the Java standard library. We chose to run our context-insensitive analysis on top of Doop's context-insensitive call graph. Mirroring Doop itself, it would also be possible to add context sensitivity to our analysis, potentially reducing the number of false positives.%, but our results suggest that this would not help much; we'll return to that point in Section~\ref{sec:evaluation}.
 
 \paragraph{Arrays and Containers} We record local variables pointing to mock-containing arrays using  {\tt isArrayLocalThatContainsMocks}. This predicate is true whenever the program under analysis stores a mock variable into an array; we also transfer array-mockness through assignments and casts. When a local variable \texttt{v} is read from a mock-containing array \texttt{c}, then \texttt{v} is marked as a mock variable, as seen in the first rule below. A store of a mock variable \texttt{mv} into an array \texttt{c} causes that array to be \texttt{isArrayLocalThatContainsMocks}. Note that these predicates are mutually-recursive. 
 

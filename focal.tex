@@ -15,7 +15,7 @@ only works on tests of mutator methods.  Purely-functional methods are beyond th
 
 Another approach uses name-based heuristics, 
 as shown by the methods2test
-dataset~\cite{tufano2020unit}.  
+dataset~\cite{tufano2020unit}.
 %% This approach uses two heuristics: 1)
 %% the name of the test matches the name of the focal method; or, 2) the
 %% test calls a unique method in the focal class. 
@@ -34,25 +34,25 @@ For this unit test, since Ghafari's algorithm does not consider accessors (``ins
 
 With the methods2test heuristics, \texttt{getToolChainsForType()} does not appear to match under its name-based heuristic. The other heuristic finds calls to the focal class, so methods2test should identify the call to \texttt{getToolChainsForType()} with that heuristic. Our mock analysis can make that heuristic more precise by removing mocks from the set of eligible focal classes.
 
-\begin{table*}
-	\centering
-	\caption{Comparison of \% of test cases with reported focal methods by the two automated focal method detection algorithms.}
-	\vspace*{.5em}
-	\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrlrrrr} \toprule
-		\multicolumn{5}{c}{Ghafari's algorithm} & & \multicolumn{5}{c}{methods2test}\\
-		\cmidrule{1-5} \cmidrule{7-11}
-		\thead{Benchmark} & \thead{Source Code \\ KLoC} & \thead{Reported \\ Focal Methods} & \thead{Test Cases} & \thead{\% of test cases \\ with focal \\ methods detected} &  & \thead{Benchmark} & \thead{Source Code \\ KLoC} & \thead{Reported \\ Focal Methods} & \thead{Test Cases} & \thead{\% of test cases \\ with focal \\ methods detected} \\ 
-		\cmidrule{1-5} \cmidrule{7-11}
+%% \begin{table*}
+%% 	\centering
+%% 	\caption{Comparison of \% of test cases with reported focal methods by the two automated focal method detection algorithms.}
+%% 	\vspace*{.5em}
+%% 	\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrlrrrr} \toprule
+%% 		\multicolumn{5}{c}{Ghafari's algorithm} & & \multicolumn{5}{c}{methods2test}\\
+%% 		\cmidrule{1-5} \cmidrule{7-11}
+%% 		\thead{Benchmark} & \thead{Source Code \\ KLoC} & \thead{Reported \\ Focal Methods} & \thead{Test Cases} & \thead{\% of test cases \\ with focal \\ methods detected} &  & \thead{Benchmark} & \thead{Source Code \\ KLoC} & \thead{Reported \\ Focal Methods} & \thead{Test Cases} & \thead{\% of test cases \\ with focal \\ methods detected} \\ 
+%% 		\cmidrule{1-5} \cmidrule{7-11}
 		
-		commons-email-1.3.3 & 8.78 & 90  & 130 &  69\%  &  &    goja-0.1.14/goja-core  & 11.52 & 27  & 80 &  34\% \\
-		PureMVC-1.0.8 & 19.46 & 34  & 43 &  79\%  &  &  mock-socket-0.9.0    & 1.09  & 4  & 34 &  12\%      \\
-		XStream-1.4.4 & 54.93 & 513  & 968 &  53\%   &  &  project-sunbird-4.3.0/sunbird-lms-service   & 45.36 & 310  & 984 &  31\%   \\
-		JGAP-3.4.4  & 73.96 & 1015  & 1390 &  73\%  &  &   optiq-0.8/core    & 93.94  & 26  & 1346 &  2\%   \\
-		\bottomrule
-		Geometric Mean &   &  &  &  68\% &   &  &  &  &  &  12\% 
-	\end{tabular}}
-	\label{tab:focal-method-algorithm-comparison}
-\end{table*}
+%% 		commons-email-1.3.3 & 8.78 & 90  & 130 &  69\%  &  &    goja-0.1.14/goja-core  & 11.52 & 27  & 80 &  34\% \\
+%% 		PureMVC-1.0.8 & 19.46 & 34  & 43 &  79\%  &  &  mock-socket-0.9.0    & 1.09  & 4  & 34 &  12\%      \\
+%% 		XStream-1.4.4 & 54.93 & 513  & 968 &  53\%   &  &  project-sunbird-4.3.0/sunbird-lms-service   & 45.36 & 310  & 984 &  31\%   \\
+%% 		JGAP-3.4.4  & 73.96 & 1015  & 1390 &  73\%  &  &   optiq-0.8/core    & 93.94  & 26  & 1346 &  2\%   \\
+%% 		\bottomrule
+%% 		Geometric Mean &   &  &  &  68\% &   &  &  &  &  &  12\% 
+%% 	\end{tabular}}
+%% 	\label{tab:focal-method-algorithm-comparison}
+%% \end{table*}
 
 
 \begin{figure}[h]
@@ -79,13 +79,13 @@ With the methods2test heuristics, \texttt{getToolChainsForType()} does not appea
 \end{figure}
 
 \paragraph{MockDetector and focal method detection}
-We compare the static analysis and name-based approaches to detecting focal methods. Table~\ref{tab:focal-method-algorithm-comparison} presents an approximation to recall---the percentage of test cases reported as having focal methods by each of the approaches. This assumes every test case has exactly one focal method. (A test case may have more than one focal method; we believe that a reasonable test has at least one focal method.) The four projects presented under Ghafari's algorithm are from their paper~\cite{ghafari15:_autom}, whereas we hand-picked four benchmarks from methods2test's dataset to match (as far as possible) those in Ghafari's work.
-
-The data suggests that methods2test's name-based approach of focal method detection has low recall. This is not surprising---their heuristics have quite strict constraints, i.e. limited applicability. We reviewed their results and found that none of their reported focal method invocations were mocks, consistent with high precision.
+We compare the static analysis and name-based approaches to detecting focal methods.
+%% Table~\ref{tab:focal-method-algorithm-comparison} presents an approximation to recall---the percentage of test cases reported as having focal methods by each of the approaches. This assumes every test case has exactly one focal method. (A test case may have more than one focal method; we believe that a reasonable test has at least one focal method.) The four projects presented under Ghafari's algorithm are from their paper~\cite{ghafari15:_autom}, whereas we hand-picked four benchmarks from methods2test's dataset to match (as far as possible) those in Ghafari's work.
+Data from~\cite{tufano2020unit} suggests that methods2test's name-based approach of focal method detection has low recall. This is not surprising---their heuristics have quite strict constraints, i.e. limited applicability. We reviewed their results and found that none of their reported focal method invocations were mocks, consistent with high precision.
 
 Ghafari kindly shared with us recent focal method detection results. The percentage of test cases where they report focal methods (a proxy to recall) is reasonably high. Sometimes, their tool automatically reports a focal method that is actually a mock invocation from the developer's standpoint---\textsc{MockDetector} would help here. 
 %On the other hand, their algorithm would return no focal method for test cases that come with no assertion statements. 
 %Overall, Ghafari's algorithm would benefit from filters to increase precision, but 
 
-In short, methods2test's approach finds focal methods with high precision but low recall, whereas Ghafari's algorithm has an acceptable recall but low precision. Our mock analysis can help increase Ghafari's precision by ruling out calls that are definitely not focal methods.
+In short, methods2test's approach finds focal methods with high precision but low recall, whereas Ghafari's algorithm has an acceptable recall but low precision. Our mock analysis can improve focal method detection---it can increase the precision of Ghafari-like methods by ruling out calls that are definitely not focal methods.
 
