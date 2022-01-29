@@ -33,7 +33,7 @@ mock objects in JUnit\footnote{\url{https://junit.org}} test cases. It starts fr
 (our analyses include hardcoded APIs for common mocking libraries EasyMock\footnote{\url{https://easymock.org/}}, Mockito\footnote{\url{https://site.mockito.org/}}, and PowerMock\footnote{\url{https://github.com/powermock/powermock}}). 
 It then propagates mockness
 through the test and identifies invocation sites as (possibly) mock.
-Given this analysis result, a subsequent analysis
+Given this analysis result, a developer or a subsequent analysis
 can ask whether a given variable in a test case contains a mock or not, and
 whether a given invocation site is a call to a mock object or not. We have
 evaluated \textsc{MockDetector} on a suite of 8 benchmarks plus a microbenchmark. 

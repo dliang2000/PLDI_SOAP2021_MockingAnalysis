@@ -1,32 +1,7 @@
-%%
-%% This is file `sample-lualatex.tex',
-%% generated with the docstrip utility.
-%%
-%% The original source files were:
-%%
-%% samples.dtx  (with options: `sigconf')
-%% 
-%% IMPORTANT NOTICE:
-%% 
-%% For the copyright see the source file.
-%% 
-%% Any modified versions of this file must be renamed
-%% with new filenames distinct from sample-lualatex.tex.
-%% 
-%% For distribution of the original source see the terms
-%% for copying and modification in the file samples.dtx.
-%% 
-%% This generated file may be distributed as long as the
-%% original source files, as listed above, are part of the
-%% same distribution. (The sources need not necessarily be
-%% in the same archive or directory.)
-%%
-%% The first command in your LaTeX source must be the \documentclass command.
 \documentclass[sigconf,review,anonymous]{acmart}
 \acmConference[ISSTA 2022]{ACM SIGSOFT International Symposium on Software Testing and Analysis}{18-22 July, 2022}{Daejeon, South Korea}
 \usepackage{mdframed}
 \usepackage{todonotes}
-%\usepackage{cite}
 \usepackage{array, booktabs, makecell} % For formal tables
 \usepackage{algorithm,algpseudocode}
 \usepackage{adjustbox}
@@ -169,9 +144,12 @@
 
 \input{conclusion}
 
-\section*{Acknowledgements} We thank the Doop developers for their timely and helpful answers to our questions. %; developer or community support is necessary to successfully use Doop.
+\begin{acks} 
+This work was funded in part by Canada's Natural Science and Engineering Research Council.
+We thank the Doop developers for their timely and helpful answers to our questions. %; developer or community support is necessary to successfully use Doop.
 %(or any research-grade program analysis framework, including Soot.)
 We also thank M. Ghafari for his timely response and for access to his focal method results. 
+\end{acks}
 
 \bibliographystyle{acm}
 \bibliography{bibliography}

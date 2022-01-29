@@ -1,5 +1,5 @@
 \begin{abstract}
-Unit testing is a widely used tool in modern software development processes. A well-known issue in writing tests is handling dependencies: creating usable objects for dependencies is often complicated. Developers must therefore often introduce mock objects to stand in for dependencies during testing. 
+Unit testing is a widely used tool in modern software development processes. A well-known issue in writing tests is handling dependencies: creating usable objects for dependencies is often complicated or infeasible. Developers must therefore often introduce mock objects to stand in for dependencies during testing. 
 
 We believe that the static analysis of test suites can enable developers to better understand and maintain existing test suites. However, because mock objects are created using reflection, they confound existing static analysis techniques. At present, it is impossible to statically distinguish methods invoked on mock objects from methods invoked on real objects. 
 
