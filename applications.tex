@@ -64,6 +64,12 @@ Developers kill mutants (and improv test suites~\cite{Petrovic:mutation_testing}
 
 Mock analysis can help developers use mutation testing as follows. Given a mutant to kill, the developer can also be told about existing test cases that touch the code changed in the mutant. Of those cases, modifying the ones that use mocks can be easier than changing those that don't, since it is easy to manipulate return values coming back from mocks.
 
+% meh, nah
+%% \paragraph{Internal mocks}
+%% Consider again the \texttt{session} mock from Listing~\ref{lis:mockCall}. This test case mocks \texttt{session.getRequest()}.
+%%  internal (defined within the project) and external (defined elsewhere). Developers ought to be sure that they have tests for internally-mocked object behaviours where these objects are not mocked. For example, the behaviour of \texttt{session.getRequest()} in Figure~\ref{fig:mockExampleEvaluation} should be tested elsewhere on a real \texttt{MavenSession} object. An IDE or CI tool could easily point this out to developers, once \textsc{MockDetector} has correctly identified \texttt{session} as a mock.
+
+
 \paragraph{Extracting API usage examples}
 Finally, mock objects can serve as even more concise API usage
 examples for the objects being mocked (compared to the test as a whole);
