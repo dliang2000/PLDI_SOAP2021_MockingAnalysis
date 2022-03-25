@@ -1,0 +1,92 @@
+ISSTA'22 Paper #347 Reviews and Comments
+===========================================================================
+Paper #347 MockDetector: A technique to identify mock objects created in
+unit tests
+
+
+Review #347A
+===========================================================================
+
+Overall merit
+-------------
+2. Weak reject
+
+Paper summary
+-------------
+This paper presents MockDetector, a data-flow based mock analysis for tracking the flows of mock objects and detecting the invocations on mock objects. The goal is to distinguish the behaviors of mock objects from real objects in the test cases. The authors describe two approaches, i.e., intraprocedural and interprocedural analyses, and implemented them in imperative (using Soot) and declarative (using Doop) manners. The evaluation shows that MockDetector is able to detect mocks in test suites of real-world applications.
+
+Comments for author
+-------------------
+pros:
++ The authors tackle a practical problem.
++ The paper is overall easy to follow.
+
+cons:
+- Lack of novelty.
+
+Below I explain my major concerns in detail.
+
+The paper lacks of novelty.
+
+This is my biggest concern. The core technique of this paper is to detect mocks by tracking the flows of mock objects from their creation sites to method invocations. However, the tracking techniques presented, including both intraprocedural and interprocedrual analyses, are trivial.
+
+As mentioned in Section 7, the mock analysis is essentially a static taint analysis. Although the authors claim that the goals and balances of mock analysis and traditional security-sensitive analysis are different, they did not propose any new techniques on achieving their goal----to me, the mock analysis looks like a standard taint tracking analysis.
+
+Interprocedural mock analysis could be improved.
+
+The authors already implemented mock analysis on top of Doop, why not leveraging pointer analysis (provided by Doop) to propagate mock objects like P/Taint [1]? Such approach has several advantages. First, the interprocedural mock analysis could be simpler: it only needs to handle mock creations, and pointer analysis (which naturally handles array, container, etc.) would take care of flow tracking. To decide whether a method invocation is mock, mock analysis just needs to check if the points-to set of the receiver variable contains any mock objects. In addition, mock analysis could enjoy various context-sensitivity algorithms provided by Doop and achieve better precision.
+
+The concept and effects of mock invocations are not clearly defined.
+
+It seems that the term "mock invocation" refers to the method invocation whose receiver objects are mock. What about the methods indirectly reachable from such invocation? Are they considered as mock methods? What if these methods have overlaps with focal methods? This issue affects the design of mock analysis and measurement of test coverage, so it should be made clear.
+
+[1] P/Taint: Unified Points-to and Taint Analysis, Neville Grech and Yannis Smaragdakis, OOPSLA 2017.
+
+
+
+Review #347B
+===========================================================================
+
+Overall merit
+-------------
+1. Reject
+
+Paper summary
+-------------
+This paper presents MockDetector, a static analysis technique for identifying mock objects and calls to mocked methods within Junit test cases. To do so, the technique first identifies instantiation of mock objects and then traces "mockness" through the test code. The authors implement two versions of the analysis, imperative and declarative, and perform a study on eight open-source benchmarks and a manually created benchmark. The evaluation investigates how common is the use of mocks, contrasts interprocedural and intraprocedural analysis, and studies the effects of mocks on test coverage. The authors also discuss various applications of their approach.
+
+Comments for author
+-------------------
+Although the topic of the paper is potentially interesting, this paper is not ready for publication at a forum such as ISSTA. The motivation is not fully convincing, as the connection between the presented approach and the client analyses is not always clear. Furthermore, the proposed analysis is fairly simple, as it boils down to traditional information propagation, and the fact of having two versions of it is not a contribution per se. Finally, the evaluation should be strengthened. It may be interesting to perform a study on mock usage within test cases, but that would require a more extensive evaluation where the benchmarks are more numerous and selected in a more rigorous manner, there is a coherent set of research questions investigated using the benchmarks, and there is an in-depth analysis of the results that provides new insight.
+
+The authors should consider extending the work along these lines or possibly submitting a revised version of the current work to a different venue. For example, publishing this work at a workshop could be a good opportunity for getting early feedback on the work and possibly discover additional applications.
+
+
+
+Response by Qian Liang <q8liang@uwaterloo.ca> (525 words)
+---------------------------------------------------------------------------
+We'd like to invite the reviewers to consider the following points.
+
+The reviewers have expressed concerns about how simple our approach is. In the PLDI 2022 instructions to reviewers, the PC chair wrote: 
+
+> Please avoid criticizing papers because the ideas are "too simple." Simple ideas that work well are often the ones that have the most impact in the long run.
+
+We feel that this is a good way to look at papers. We encountered the problem motivating this paper working on a different problem and thought it would be of broader interest. We have carefully evaluated our technique on a representative set of benchmarks and strongly believe that adding more benchmarks would not fundamentally change the results, which show that our analyses are extremely effective at identifying mock objects. (Having two implementations is not in itself a contribution, but it gives additional assurance that the results are correct.)
+
+Yes, our technique is *similar* (not identical) to taint analysis. Many analyses are. No existing work looks at using this style of analysis to statically examine test cases and determine key properties of them. In particular, due to the inherent use of reflection in mocking frameworks, it was not a priori clear that our technique would even work to detect mock invocations.
+
+We reiterate that current static analysis frameworks are unable to differentiate real objects from mock objects in test cases; today, one of us attended a talk where the speaker had indeed performed static analysis on test cases (to further enhance them). Being aware of mock objects is, we claim, essential for accurately analyzing test cases.
+
+# Reviewer A
+
+> Interprocedural mock analysis could be improved.
+
+We do not believe that such an approach would be more effective, and it is certainly not simpler than our approach, which is 535 lines of easy-to-read Datalog in total. In particular, depending on the heap abstraction, points-to analyses can well lose precision on arrays and containers in a way that we don't; we know that our container abstraction works well for what appears in actual test cases (which are fundamentally different from main code). See [1] for an example of special case treatment of containers in pointer analysis.
+
+> What about the methods indirectly reachable from such invocation?
+
+The really interesting thing about mock invocations is that a naive static analysis would be completely incorrect about the effect of a mock invocation. Once a test case makes a mock invocation, the mock library uses reflection to fully handle the invocation. The mock library does not call back into any client code (so, no methods outside the mock library are indirectly reachable). Instead, the mock library returns what the test case has previously recorded as the desired result of the mock invocation. We think it is critical for a static analysis of a test case to properly handle this.
+
+We hope that this response helps the reviewers reach a fair decision on our submission.
+
+[1] Pratik Fegade and Christian Wimmer. 2020. Scalable pointer analysis of data structures using semantic models. In Proceedings of the 29th International Conference on Compiler Construction (CC 2020). Association for Computing Machinery, New York, NY, USA, 39–50. DOI:https://doi.org/10.1145/3377555.3377885
