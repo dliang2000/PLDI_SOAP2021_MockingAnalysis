@@ -179,6 +179,18 @@ Table~\ref{tab:run-times} presents summary information about our benchmarks and 
 
 Of our benchmarks, 3 show almost no mock use, 2 show extensive use, and the remainder are in between. Benchmarks \textsc{vraptor-core} and \textsc{jsonschema2pojo-core} have more than half of their test-related methods containing mock objects (and mock-containing arrays); in both of these, most field mocks are created via annotations and reused in multiple test cases. The difference in mock usage reflects their different philosophies and constraints regarding the creation and usage of mock objects in tests.
 
+\subsection{Answering our RQs}
+\paragraph{RQ1} We look into 1565 benchmarks obtained from the Duets dataset~\cite{durieux2021duets} and observe the usage frequency 
+of mock objects from 3 common mocking libraries EasyMock , Mockito and PowerMock. Our findings corroborate findings from 
+previous studies. \todo[inline]{cite based on related work} We also look at the contribution of mocks to coverage, which is further 
+discussed in Section~\ref{sec:coverage}
+
+\paragraph{RQ2} We use our convenience sample of 8 benchmarks to answer this RQ. We compare the number of nodes that are assumed to be reachable
+because a mock invocation is not differentiated to the total number of nodes reachable by test-related methods. \textsc{MockDetector} can help make static 
+analyses on test code more precise by filtering out nodes assumed to be reachable from mock invocations.
+
+\todo[inline]{fit this in with the rest of the section, talk about the actual numbers}
+
 \subsection{Mock Analysis Results}
 Table~\ref{tab:invokes} is the core result about our mock analyses. It presents the detected number of method invocations on mocks. We include numbers from the imperative intraprocedural Soot implementation, as well as intraprocedural and interprocedural versions of the declarative Doop implementation.
 
@@ -264,7 +276,7 @@ We have not quantified imprecision due to arrays, fields, and collections; howev
 %\end{mdframed}
 %We can deduce that our pre-analysis for field mocks described in Section~\ref{subsubsec:pre-analysis} is required for analyzing mocks in  test suites.
 
-\subsection{Application: Mocks contribute to coverage} Since our mock analysis identifies mock objects, we are in a position to empirically evaluate the importance of mock objects in our benchmarks' test suites. One measure of their importance is how much they contribute to code coverage. Using jacoco with the surefire Maven plugin, we measured branch and statement coverage for 4 of our benchmarks (the ones with nontrivial mock usage, excluding one benchmark with parametrized test cases), both with and without test cases that contain intraprocedural mock invocations. We excluded intraprocedural mocks (on a per-test-case granularity) by generating custom Maven test execution commandlines.
+\subsection{Application: Mocks contribute to coverage}\label{sec:coverage} Since our mock analysis identifies mock objects, we are in a position to empirically evaluate the importance of mock objects in our benchmarks' test suites. One measure of their importance is how much they contribute to code coverage. Using jacoco with the surefire Maven plugin, we measured branch and statement coverage for 4 of our benchmarks (the ones with nontrivial mock usage, excluding one benchmark with parametrized test cases), both with and without test cases that contain intraprocedural mock invocations. We excluded intraprocedural mocks (on a per-test-case granularity) by generating custom Maven test execution commandlines.
 
 \begin{table*}
 	\centering
