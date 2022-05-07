@@ -3,6 +3,8 @@
 
 We now quantitatively characterize the performance of our mock analysis implementations on a suite of popular open-source applications. We also provide evidence about the importance of mock invocations to test suites.
 
+To sanity-check our results, we also partially replicated the results of Mostafa and Wang~\cite{mostafa14:_empir_study_usage_mockin_framew_softw_testin} on 1547 benchmarks from the DUETS dataset~\cite{durieux2021duets}, of which 1537 contained test-related methods. Like them, we also found that 23\% of our test-containing benchmarks (381) instantiated mock objects (which matches their number eerily well). Of benchmarks that instantiated mocks, the mean number of mock instantiations per benchmark was 48.3. The mean number of test-related methods was 110.2 and the mean number of test-related methods instantiating mocks was 20.5. Finally, the mean number of test packages from which mocks were instantiated was 3.2. We agree with Mostafa and Wang that the number of Java programs that use mocks is significant; these programs also distribute the use of mocks throughout their test suites, and use quite a few mock objects in their suites.
+
 \begin{table*}
 	\centering
 	\caption{Our suite of 8 open-source benchmarks (8,000--117,000 LOC) plus our microbenchmark. Soot and Doop analysis run-times.}
@@ -166,7 +168,7 @@ We now quantitatively characterize the performance of our mock analysis implemen
 Table~\ref{tab:run-times} presents summary information about our benchmarks and run-times---the LOC and Soot and Doop analysis run-times for each benchmark. The 9 benchmarks include over 383 kLOC, with 184 kLOC in the test suites, per SLOCCount\footnote{\url{https://dwheeler.com/sloccount/}}.  Our benchmarks are from different domains and created by different groups of developers. The Soot total time is the amount of time that it takes for Soot to analyze the benchmark and test suite in whole-program mode, including our analyses. The Soot intraprocedural analysis time is the sum of run-times for the main analysis plus two pre-analyses (Section~\ref{subsec:soot}). The reported Doop run-time is from the context-insensitive analysis, while the Doop analysis time for intraprocedural and interprocedural mock invocation analyses are for running the analysis alone based on recorded facts from the benchmark. The total Doop run-time is much slower than the total Soot run-time because Doop always computes a callgraph---an expensive operation. The Doop analysis-only time is also slower than the Soot time; Doop computes a solution over the entire program, while Soot works one method at a time.
 %The major difference between the Doop's total run-time and the actual time spent on mock invocation analysis comes from the build of the complete graph. %Add reference for SLOCCount.
 
-\paragraph{Mock usage in suite} Table~\ref{tab:mocks} presents the number of test-related (Test/Before/After) methods that contain local variables or that access fields that are mocks, mock-containing arrays, or mock-containing collections, as reported by our Soot-based intraprocedural analysis. Table~\ref{tab:mocks} also presents the total number of field mock objects created in each benchmark; 5 out of the 8 open-source benchmarks use field mock objects for ease of testing. Instead of creating the same mock objects in each test case requiring them, these benchmarks choose to create the field mock objects once and use them in all the test cases. The data suggest that our pre-analysis for field mocks is necessary to consequently analyzing for mock objects and mock invocations.
+\paragraph{Mock usage in suite} Table~\ref{tab:mocks} presents the number of test-related (Test/Before/After) methods that contain local variables or that access fields that are mocks, mock-containing arrays, or mock-containing collections, as reported by our Soot-based intraprocedural analysis. Table~\ref{tab:mocks} also presents the total number of field mock objects created in each benchmark; 5 out of the 8 open-source benchmarks use field mock objects for ease of testing. Instead of creating the same mock objects in each test case requiring them, these benchmarks choose to create the field mock objects once and use them in all the test cases. The data suggest that our pre-analysis for field mocks is necessary.
 
 \begin{mdframed}[
 	leftmargin=\parindent,
@@ -180,10 +182,6 @@ Table~\ref{tab:run-times} presents summary information about our benchmarks and 
 Of our benchmarks, 3 show almost no mock use, 2 show extensive use, and the remainder are in between. Benchmarks \textsc{vraptor-core} and \textsc{jsonschema2pojo-core} have more than half of their test-related methods containing mock objects (and mock-containing arrays); in both of these, most field mocks are created via annotations and reused in multiple test cases. The difference in mock usage reflects their different philosophies and constraints regarding the creation and usage of mock objects in tests.
 
 \subsection{Answering our RQs}
-\paragraph{RQ1} We look into 1565 benchmarks obtained from the Duets dataset~\cite{durieux2021duets} and observe the usage frequency 
-of mock objects from 3 common mocking libraries EasyMock , Mockito and PowerMock. Our findings corroborate findings from 
-previous studies. \todo[inline]{cite based on related work} We also look at the contribution of mocks to coverage, which is further 
-discussed in Section~\ref{sec:coverage}
 
 \paragraph{RQ2} We use our convenience sample of 8 benchmarks to answer this RQ. We compare the number of nodes that are assumed to be reachable
 because a mock invocation is not differentiated to the total number of nodes reachable by test-related methods. \textsc{MockDetector} can help make static 
