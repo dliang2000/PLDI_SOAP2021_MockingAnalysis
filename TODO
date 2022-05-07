@@ -1,1 +1,9 @@
-Note: Laurian's analysis about circumscribing the effects of a test case is just going to plain return the wrong thing if it doesn't take mock calls into account. (It will return too many effects; mocks have no real effects).
+* evaluation:
+
+** move RQs here
+** add empirical study
+** add nodes-obscured-by-mocks
+
+* chop arrays and collections from motivating example
+
+* code dump

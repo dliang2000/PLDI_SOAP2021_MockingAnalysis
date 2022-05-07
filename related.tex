@@ -1,15 +1,24 @@
 \section{Related Work}
 \label{sec:related}
 
-We discuss related work in the areas of focal method detection,
+We discuss related work in the areas of empirical studies of mock usage and static analysis of tests, focal method detection,
 % declarative versus imperative static analysis,
 treatment of containers, and taint analysis.
+
+\paragraph{Static analysis of tests and mocks}
+Researchers have (1) proposed PMD-style simple syntactic static analyses for test cases; and (2) empirically analyzed how often, and in what circumstances, developers use mock objects.
+Ramler et al~\cite{ramler16:_autom_static_analy_unit_test_code} distilled their experience working with test cases, as well as input from experts, to write 42 static checks for code smells in test cases.
+They share our broad goal of statically analyzing test cases, but they do so to improve test cases directly; our long-term goal is instead to use information gleaned from tests to reason about the
+programs. In the context of mocks, Mostafa and Wang~\cite{mostafa14:_empir_study_usage_mockin_framew_softw_testin} carried out an empirical study on 5,000 open source software projects, reporting that
+23\% of software projects with tests use mocks, and that mocks were usually of classes directly from the system under test rather than its dependencies; they also reported the most-used mock APIs.
+Spadini et al~\cite{spadini19:_mock_java} furthermore investigated rationales for using mocks, obtained from interviews with professionals as well as manual code inspection. Our work relies on the
+fact that mock use is quite common, and aims to provide tools to other researchers who are doing static analysis using test cases.
 
 \paragraph{Focal methods and classes} To situate Ghafari et al's work~\cite{ghafari15:_autom}, a number of previous works have studied test-to-code traceability by identifying focal \emph{classes} for a test case---the classes which are tested by a test case. The focal \emph{methods} we discuss in this paper belong to focal classes. Ghafari et al were the first to extend the study of traceability to focal methods. Before that, Qusef et al proposed techniques which identify focal classes. In~\cite{DBLP:conf/icsm/QusefBOLB11}, they propose a two-stage approach relying on the assumption that the last assertion statement in a test case is the key assertion. The first stage uses dynamic slicing to find all classes that contribute to the values tested in the assertion (possibly including mocks), while the second stage filters classes and keeps only those textually closest to the test class. An additional mock object filter would help remove definitely-not-focal classes. Earlier work by Qusef et al~\cite{DBLP:conf/icsm/QusefOL10} uses dataflow analysis instead of dynamic slicing.
 
 Rompaey and Demeyer~\cite{rompaey09:_estab_traceab_links_unit_test} evaluate six other heuristics for finding focal classes: naming conventions, types referred to in tests (``fixture element types''), the static call graph, the last call before the assert, lexical analysis of the code and the test, and co-evolution of the test and the main code. No heuristic dominates: different heuristics work for different codebases. Our approach adds another way to rule out unwanted focal method and focal class results.
 
-Ying and Tarr~\cite{DBLP:conf/eclipse/YingT07} also propose heuristics to filter out unwanted methods during code inspection. Their heuristics are based on characteristics of the call graph, i.e. they filter out small methods and methods closer to the bottom of a call graph, depending on tuneable parameters. These heuristics empirically eliminate mock calls in their benchmarks, but there is no principled reason for that to be the case, and indeed, the static call graph that they depend on should not interact well with mock calls.
+Ying and Tarr~\cite{DBLP:conf/eclipse/YingT07} also propose heuristics to filter out unwanted methods during code inspection. Their heuristics are based on characteristics of the call graph, i.e. they filter out small methods and methods closer to the bottom of a call graph, depending on tuneable parameters. These heuristics empirically eliminate mock calls in their benchmarks, but there is no principled reason for that to be the case, and indeed, the static call graph that they depend on will include too many edges in the presence of mock calls.
 
 \paragraph{Treatment of containers} In this work, we use coarse-grained abstractions for containers, consistent with the approach from Chu et al~\cite{chu12:_collec_disjoin_analy}. We do not observe sophisticated container manipulations where it would be necessary to track exactly which elements of a container are mocks. Were such an analysis necessary, the fine-grained container client analysis by Dillig et al~\cite{dillig11:_precis_reason_progr_using_contain} would work.
 

@@ -20,8 +20,8 @@ Adding (context-insensitive) interprocedural support to a Doop analysis is almos
 Both analyses support arrays, containers, and fields. Although declarative analyses are easier to define than their imperative counterparts, they are still subject to the feature interaction problem: for instance, they still must specifically handle the case where an array-typed field is assigned from a mock-containing array local.
 
 % Mock Libraries discussed in Common Infrastructure section, perhaps refer to the paragraph in Common Infrastructure section?
-The implementation declares facts for 9 mock source methods manually gleaned from the mock libraries' documentation, as specified through method signatures (e.g. 
-\texttt{<org.mockito.\\Mockito: java.lang.Object mock(java.lang.Class)>}.)
+The implementation declares facts for 9 mock source methods (manually gleaned from the mock libraries' documentation) as method signatures (e.g. 
+\texttt{<org.mockito.Mockito: java.lang.Object mock(java.lang.Class)>}.)
 It then declares that a variable {\tt v} satisfies \verb+isMockVar(v)+ if it is assigned from the return value of a mock source, or otherwise traverses the program's interprocedural control-flow graph, through assignments, which may possibly flow through fields, collections, or arrays. Finally, an invocation site is a mock invocation if the receiver object {\tt v} satisfies \verb+isMockVar(v)+.
 
 \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=none,label={lst:core},caption={Selected rules for Datalog mock analysis},
@@ -40,7 +40,7 @@ isMockVar(v) :- isMockVar(v1),
 
 The Doop-provided predicates \texttt{AssignReturnValue}, \texttt{AssignCast}, and \texttt{AssignLocal} resemble Java bytecode instructions; for instance, \texttt{AssignLocal(?from:Var, ?to:Var, ?inmethod:Method)} is an assignment statement copying from variable \texttt{?from} to \texttt{?to} in method \texttt{?inmethod}. (It is Datalog convention to prefix parameters with \texttt{?}s).
 
-We designed the analysis in a modular fashion, such that the interprocedural, collections, arrays, and fields support can all be disabled through the use of \verb+#ifdef+s, which can be specified on the Doop command-line.
+We designed the analysis modularly: interprocedural, collections, arrays, and fields support can all be disabled through the use of \verb+#ifdef+s, which can be specified on the Doop command-line.
 
 \paragraph{Interprocedural support}
 As mentioned above, it was quite easy to implement interprocedural analysis in our Doop implementation; we leveraged Doop's call graph and simply propagated mockness information along its call graph edges.
@@ -57,8 +57,7 @@ isInterprocMockVar(v) :-
 // callee(v) results in formal
 //   param of callee being mock
 isInterprocMockVar(v_callee) :- isMockVar(v),
-  ActualParam(n, mi, v),
-  FormalParam(n, callee, v_callee),
+  ActualParam(n, mi, v), FormalParam(n, callee, v_callee),
   mainAnalysis.CallGraphEdge(_, mi, _, callee),
   Method_DeclaringType(callee, callee_class),
   ApplicationClass(callee_class).
@@ -82,13 +81,13 @@ isArrayLocalThatContainsMocks(c) :-
 
 We treat collections analogously. However, while there is one API for arrays---bytecode array load and store instructions---Java's Collections APIs include, by our count, 60 relevant methods. We support iterators, collection copies via constructors, and add-all methods. We use our classification of collection methods to identify collection reads and writes and handle them as we do array reads and writes. We also handle {\tt Collection.toArray} by propagating mockness from the collection to the array.%, except that we say that it is a mock-containing collection, not a mock-containing array.
 
-\paragraph{Fields} Apart from the obvious rule stating that a field which is assigned from a mock satisfies {\tt fieldContainsMock}, we also label fields that have the {\tt org.mockito.Mock} or \\{\tt org.easyMock.Mock} annotations as mock-containing. We declare that a given field \emph{signature} may contain a mock, i.e. the field with a given signature belonging to all objects of a given type. We also support containers stored in fields.
+\paragraph{Fields} Apart from the obvious rule stating that a field which is assigned from a mock satisfies {\tt fieldContainsMock}, we also label fields that have the {\tt org.mockito.Mock} or {\tt org.easyMock.Mock} annotations as mock-containing. We declare that a given field \emph{signature} may contain a mock, i.e. the field with a given signature belonging to all objects of a given type. We also support containers stored in fields.
 
 \paragraph{Arrays and Fields} We also support not just array locals but also array fields. That is, when an array-typed field is assigned from a mock-containing array local, then it is also a mock. And when an array-typed local variable is assigned from a mock-containing array field, then that array local is a mock-containing array.
 
 \subsection{Imperative Soot Implementation}
 \label{subsec:soot}
-We now briefly describe our Soot-based imperative dataflow analysis to find mocks. Like the declarative analysis, we track information from the creation sites through the control-flow graph. Here, we implement a forward dataflow may-analysis---an object is declared a mock if there exists some execution path where it may receive a mock value. The treatment of arrays, fields, and containers mirrors that in the Doop implementation. The dataflow analysis maps values in the IR to three bits: one for the value being a mock, one for it being an array containing a mock, and one for it being a collection containing a mock. %At most one of the three bits may be true for any given value.
+We briefly describe our Soot-based imperative dataflow analysis to find mocks. Like the declarative analysis, we track information from the creation sites through the control-flow graph. Here, we implement a forward dataflow may-analysis---an object is declared a mock if there exists some execution path where it may receive a mock value. The treatment of arrays, fields, and containers mirrors that in the Doop implementation. The dataflow analysis maps values in the IR to three bits: one for the value being a mock, one for it being an array containing a mock, and one for it being a collection containing a mock. %At most one of the three bits may be true for any given value.
 Space limitations prevent us from including full details of this implementation, but we will make all implementations available, and the analysis is fully described in the first author's master's thesis\footnote{Citation temporarily omitted due to double-blind review, but available on our institutional repository.}.
 
 % Mock Libraries discussed in Common Infrastructure section
@@ -282,7 +281,7 @@ private RuleFactory ruleFactory = mock(RuleFactory.class);
 
 \subsection{Common Infrastructure}
 \label{sec:common}
-We have parameterized our technique with respect to mocking libraries and have instantiated it with respect to the popular Java libraries Mockito, EasyMock, and PowerMock. We also support JUnit 3 and 4+. %We discuss the parameterization in this subsection.
+We parameterized our technique with respect to mocking libraries and  instantiated it with respect to the popular Java libraries Mockito, EasyMock, and PowerMock. We support JUnit 3 and 4+. %We discuss the parameterization in this subsection.
 
 JUnit and mocking libraries all rely heavily on reflection, and would normally pose problems for static analyses: the set of reachable test methods is enumerated at run-time; mock libraries create mock objects reflectively. Fortunately, their use of reflection is stylized. We designed our analyses to soundly handle these libraries.
 
@@ -326,5 +325,5 @@ Our intraprocedural mock analysis is similar to reaching definitions. However, w
 For the base analysis, reaching definitions can sometimes indicate whether mock definitions reach uses. However, mock analysis also requires propagating information through casts, as seen in the \texttt{AssignCast} rule in the declarative analysis; at statement {\tt s: x = (X)y;}, then {\tt x} would be a mock iff {\tt y} is. Statement {\tt s} would be a definition for {\tt x}, and a further query would be needed to know whether {\tt y} was a mock or not.
 
 \paragraph{Program Slicing}
-Another alternative to reaching definitions for finding mocks is program slicing: to find out whether an invocation {\tt o.f()} is a mock invocation, compute a slice of statements that affect {\tt o.f()}. The usual issue with slicing is that too much of the program is flagged as potentially relevant, as pointed out by Sridharan et al~\cite{sridharan07:_thin_slicin}. They thus proposed thin slicing, which returns a much smaller fraction of the program. Such an approach could work for developers, generalizing the reaching definitions approach alluded to above. Note that the slicing would need to include results through arrays and fields. Even so, it would again be difficult to use slices as information about mocks in a subsequent analysis; our technique instead specifically identifies mock-containing variables and invocations.
+Another alternative to reaching definitions for finding mocks is program slicing: to find out whether an invocation {\tt o.f()} is a mock invocation, compute a slice of statements that affect {\tt o.f()}. The usual issue with slicing is that too much of the program is flagged as potentially relevant, as pointed out by Sridharan et al~\cite{sridharan07:_thin_slicin}. They thus proposed thin slicing, which returns a much smaller fraction of the program. Such an approach could work for developers, generalizing the reaching definitions approach alluded to above. The slicing would need to include results through arrays and fields. Even so, it would still be difficult to use slices as information about mocks in a subsequent analysis; our technique specifically identifies mock-containing variables and invocations.
 
