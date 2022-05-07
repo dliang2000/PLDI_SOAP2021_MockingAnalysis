@@ -21,13 +21,15 @@ readable.
 Our mock analysis helps segregate tests into parts that are
 mock-related and parts that are not mock-related. This is directly applicable
 to identifying focal methods, as we'll discuss in Section~\ref{sec:focal}.
-Also, it is fairly
-obvious to a human reader that the part of a test that is calling mock
-library methods such as \texttt{thenReturns()} is setting up mock
-expectations, but we've seen cases where this is less
-obvious. In particular, when recording behaviours with EasyMock,
+When recording behaviours with EasyMock,
 the developer simply calls methods on the mock object, e.g. 
-\texttt{mock.documentAdded("document")}.
+\texttt{mock.documentAdded("document")}, so it can be difficult even for a
+human reader to tell that calls are mock.
+%% Also, it is fairly
+%% obvious to a human reader that the part of a test that is calling mock
+%% library methods such as \texttt{thenReturns()} is setting up mock
+%% expectations, but we've seen cases where this is less
+%% obvious.
 
 Knowing what is a mock can help developers debugging test case
 failures: 1) when looking at
