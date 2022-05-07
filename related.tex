@@ -10,7 +10,7 @@ Researchers have (1) proposed PMD-style simple syntactic static analyses for tes
 Ramler et al~\cite{ramler16:_autom_static_analy_unit_test_code} distilled their experience working with test cases, as well as input from experts, to write 42 static checks for code smells in test cases.
 They share our broad goal of statically analyzing test cases, but they do so to improve test cases directly; our long-term goal is instead to use information gleaned from tests to reason about the
 programs. In the context of mocks, Mostafa and Wang~\cite{mostafa14:_empir_study_usage_mockin_framew_softw_testin} carried out an empirical study on 5,000 open source software projects, reporting that
-23\% of software projects with tests use mocks, and that mocks were usually of classes directly from the system under test rather than its dependencies; they also reported the most-used mock APIs, 
+23\% of software projects with tests use mocks, and that mocks were usually of classes directly from the system under test rather than its dependencies; they also reported the most-used mock APIs.
 Spadini et al~\cite{spadini19:_mock_java} furthermore investigated rationales for using mocks, obtained from interviews with professionals as well as manual code inspection. Our work relies on the
 fact that mock use is quite common, and aims to provide tools to other researchers who are doing static analysis using test cases.
 

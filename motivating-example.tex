@@ -3,17 +3,15 @@
 
 \textsc{MockDetector} finds variables containing mock objects, along with invocations on mock objects, in unit tests. It does so by identifying invocations on variables which have been assigned an object flowing from a mock creation site either using a forward dataflow may-analysis (Soot) or by solving declarative constraints (Doop).
 
-\begin{lstlisting}[basicstyle=\ttfamily, caption={Code snippet from maven-core, where calls to both the focal method \texttt{getToolchainsForType()} and to mock \texttt{session}'s \texttt{getRequest()} method occur in test \textit{testMisconfiguredToolchain()}.},
+\begin{lstlisting}[basicstyle=\ttfamily, caption={Code from maven-core; calls to focal method \texttt{getToolchainsForType()} and to mock \texttt{session}'s \texttt{getRequest()} method occur in \textit{testMisconfiguredToolchain()}.},
 numbers=left,numbersep=2pt,basicstyle=\scriptsize\ttfamily,language = Java, framesep=4.5mm, escapechar=|,
 framexleftmargin=1.0mm, captionpos=b, label=lis:mockCall, morekeywords={@Test}]
 @Test public void testMisconfiguredToolchain() throws Exception {
   MavenSession session = mock( MavenSession.class );
   MavenExecutionRequest req = new DefaultMavenExecutionRequest();
   when( session.getRequest() ).thenReturn( req ); |\label{line:mock}|
-
   ToolchainPrivate[] basics =
     toolchainManager.getToolchainsForType("basic", session); |\label{line:real}|
-
   assertEquals( 0, basics.length );
 }
 \end{lstlisting}
