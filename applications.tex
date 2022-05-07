@@ -19,10 +19,10 @@ enables the automatic generation of tests which are especially
 readable.
 
 Our mock analysis helps segregate tests into parts that are
-mock-related and parts that are not mock-related. This is directly applicable
-to identifying focal methods, as we'll discuss in Section~\ref{sec:focal}.
+mock-related and parts that are not. This is directly applicable
+to identifying focal methods (see Section~\ref{sec:focal}).
 When recording behaviours with EasyMock,
-the developer simply calls methods on the mock object, e.g. 
+the developer calls apparently-real methods on the mock object, e.g. 
 \texttt{mock.documentAdded("document")}, so it can be difficult even for a
 human reader to tell that calls are mock.
 %% Also, it is fairly
@@ -31,7 +31,7 @@ human reader to tell that calls are mock.
 %% expectations, but we've seen cases where this is less
 %% obvious.
 
-Knowing what is a mock can help developers debugging test case
+Knowing what is a mock can help developers debug test case
 failures: 1) when looking at
 mock calls, they know that these calls are not
 directly causing the test failures; but also, 2) if the mock calls
@@ -61,10 +61,10 @@ disregarding mocks.
 \paragraph{Mutation testing}
 Although code coverage metrics are well established, they are most useful in highlighting what is not covered in testing, and not strongly correlated with test suite effectiveness~\cite{inozemtseva14:_cover_not_stron_correl_test_suite_effec}. Mutation testing has been gaining popularity in practice~\cite{petrovic55:_pract_mutat_testin_scale,beller2021use}.
 % The idea is to generate mutants---altered version of a program which presumably have incorrect behaviour. 
-Developers kill mutants (and improv test suites~\cite{Petrovic:mutation_testing}) by writing tests to distinguish between the original program and the mutant. 
+Developers kill mutants (and improve test suites~\cite{Petrovic:mutation_testing}) by writing tests to distinguish between the original program and the mutant. 
 %Mutants can thus incite developers to improve their test suites, and Petrovi\'c et al~\cite{Petrovic:mutation_testing} provide evidence that mutation testing does so.
 
-Mock analysis can help developers use mutation testing as follows. Given a mutant to kill, the developer can also be told about existing test cases that touch the code changed in the mutant. Of those cases, modifying the ones that use mocks can be easier than changing those that don't, since it is easy to manipulate return values coming back from mocks.
+Mock analysis can help developers use mutation testing as follows. Given a mutant to kill, the developer can also be told about existing test cases that touch the code changed in the mutant. Both in this application and in the {\sc Minion} system~\cite{samak16:_direc_synth_failin_concur_execut}, modifying tests with mocks can be easier than changing those that don't---it is easy to manipulate values returned from mocks.
 
 % meh, nah
 %% \paragraph{Internal mocks}
@@ -84,7 +84,9 @@ In summary, our applications show that the treatment of mocks and non-mocks
 when editing test cases (manually or automatically) should be different.
 Furthermore, especially for automatic treatments of test cases, a static
 analysis determining which invocations are mock invocations is key to effective
-treatment.
+treatment. Without mock detection, the static analysis must take into
+account possible effects from the real calls (which are in fact replaced by mocks),
+and will thus return less precise results.
 
 %* code recommendation for editing test cases
 %* automated debugging and repair that rely on failing tests to id repair subjects
