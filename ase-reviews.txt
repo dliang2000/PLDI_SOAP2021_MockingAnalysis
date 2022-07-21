@@ -1,0 +1,205 @@
+﻿ [ASE'22] Notification for submission #1269 "MockDetector: Understanding the usage of..."
+Subject:
+[ASE'22] Notification for submission #1269 "MockDetector: Understanding the usage of..."
+From:
+"ASE'22 HotCRP" <noreply@ase2022.hotcrp.com>
+Date:
+2022-07-20, 18:16
+To:
+Patrick Lam <patrick.lam@uwaterloo.ca>
+CC:
+ase2022research@gmail.com
+
+Dear Patrick Lam,
+
+Thank you for your submission to ASE 2022. On behalf of the Program Committee, we regret to inform you that your submission:
+
+PAPER ID: #1269
+TITLE: "MockDetector: Understanding the usage of..."
+
+was not accepted for inclusion in the ASE 2022 technical program.
+
+The competition was tough. This year, ASE has received a record of 531 submissions. After desk-rejecting 4 submissions due to double-anonymous and formatting violations, 527 submissions went through a thorough review process. During this process, each submission was reviewed by at least three Program Committee members and was intensively discussed online. In the end, the Program Committee decided to accept 78 submissions; another 38 submissions were accepted conditionally, provided that the authors adequately address the reviewers’ comments in the revision. We will announce the acceptance rate after finalizing all conditional decisions.
+
+We include all reviews for your paper below; they are also available at https://ase2022.hotcrp.com/paper/1269. One of the reviews, marked as “meta-review”, includes the summary of the discussion and the recommendations of the reviewers. We hope you will find the reviews useful for your future work.
+
+ASE 2022 will take place in person, in the area of Ann Arbor, Michigan, United States, on October 10-14, 2022. For details about the conference, including workshops and other tracks (many of which still accept submissions), please see the conference website at https://conf.researchr.org/home/ase-2022.
+
+We hope to see you at ASE 2022!
+
+Kind regards,
+Julia Rubin and Shahar Maoz
+ASE’22 Program Committee Co-Chairs
+
+
+---
+
+Review #1269A
+===========================================================================
+
+Overall merit
+-------------
+1. Reject
+
+Paper summary
+-------------
+In unit testing, developers usually leverage mock objects to replace certain test dependencies to ease testing. However, the use of mock objects may hinder some static analysis techniques such as identifying focal method. The authors are motivated to develop a technique (i.e., MockDetector) to statically distinguish between a method invocation on a mock object from that on a real object. They implemented MockDetector on Soot, an imperative static analysis tool, and Doop, a declarative static analysis tool. The evaluation shows that MockDetector can detect thousands of method invocations on mock objects in a benchmark dataset constructed from 8 open-source projects. Besides, the authors also discussed several potential application scenarios of MockDetector.
+
+Strengths
+---------
++ Dataset collected from real-world projects
++ Mocking-related topics are not well-studied in the literature
+
+Weaknesses
+----------
+- The motivation and the application scenarios of MockDetector are not convincing
+- The technical contribution is thin
+- No evaluation on the usefulness of the technique in any discussed application scenarios
+- The contents are hard to follow
+
+Comments for authors
+--------------------
+Significance:
+
+This paper proposes a tool, MockDetector, to identify method calls to mock objects in unit tests. The authors discuss several application scenarios of the technique to motivate the technique. However, the descriptions on the application scenarios are vague and not convincing. For example, the authors mention that detecting method calls to mock objects can improve focal method detection techniques. In Section 4, the authors indicate that MockDetector eliminate mock calls from focal methods using Figure 2 as an example. The example only contains one method left after eliminating the mock calls. This example is not so convincing as in practice, there may be many method calls left after eliminating mock calls. MockDetector may not be effective in those cases. The authors also mentioned that the author of methods2test confirmed that their tool sometimes report mock calls as focal methods. However, no statistics on the prevalence of these cases are provided in this paper. The evaluation of this paper does not demonstrate the usefulness of MockDetector in any of the discussed application scenarios. As a result, we have no idea how MockDetector can improve the focal method detection techniques in practice.
+
+In addition, several application scenarios (Section 3) are loosely connected to mock method call detection. For example, why is such distinction useful for code recommendation? The code related to mocking may also need to be updated when the production code is changed since they are closely coupled as reported by their related work [23]. What benefits will the distinction between mock calls and concrete calls bring to code recommendation? Besides, for mutation testing, I don’t see the need to identify method calls to mock objects to manipulate the mock object behaviors. We only need to identify the APIs of mocking frameworks such as when(xxx).thenReturn(xxx), and change the return value to manipulate the mock object behaviors. A simple API signature matching can help. It is unclear why MockDetector is needed.
+
+In summary, I’m not convinced by the motivation and application scenarios of MockDetector. I’d like to suggest the authors to focus on fewer application scenarios but provide more statistical and concrete support to show that MockDetector can achieve improvements in the discussed application scenarios. It will also be useful if the authors can evaluate MockDetector in a concrete application scenario to show the improvement.
+
+Novelty:
+
+There is a lack of novelty in this paper in terms of technical contributions. The technique is basically a typical taint analysis starting from mock object creation APIs. Although the authors discussed the differences between mock analysis and reaching definition, it seems that the differences are typical challenges in precise taint analysis and the authors resolved the challenges by integrating some domain-specific propagation rules – this is also a typical practice when leveraging taint analysis in specific domains.
+
+In Section 7, the authors discussed the difference between their technique and taint analysis and indicated that the major difference is that MockDetector has more sinks: all calls to the tainted mock objects should be considered as mock invocations. I think this is even simplifying the problem. We do not need to look for sinks in the analysis.
+
+Soundness, verifiability & transparency:
+
+The authors did not make a precise, non-ambiguous description of the detection algorithm.
+Instead, they pieced together the technical approach with massive implementation details, which makes the algorithm not clear and hinders the verification of soundness.
+Therefore, I suggest the authors to cut off some of the implementation details and focus on presenting the methodology at a higher level.
+
+Specifically, I recommend the authors to answer the following questions:
+- What is the scope of the technique? What kind of mock objects can MockDetector detect? Is the scope align with the proposed application scenarios?
+- Why did the authors choose to implement MockDetector on both Soot and Doop?
+- Why is it necessary to add inter-procedural support? What are the challenges and how are they addressed?
+- You used approximate strategies to handle the value propagation involving arrays, containers, and fields. To what extent can they generalize to real-world projects?
+
+The authors also did not provide their artifact as supplementary materials.
+
+Evaluation:
+
+The evaluation is also problematic. The authors only showed the number of the mock invocations they detected and the execution time. The authors only briefly discussed the imprecision and unsoundness in practice. This may not be very convincing. Manually analyzing 23 test cases may not be sufficient. In addition, the authors should better present their manual analysis procedure and criteria to justify the correctness of the manual analysis.
+
+In addition, the authors did not evaluate MockDetector in a concrete application scenario. In section 6.2, the authors present mock objects’ impact on code coverage. However, this is a demonstration of usefulness of mocking techniques in general instead of an application of MockDetector. Also, the difference in coverage is not contributed only by mock objects: other parts of those removed test cases also contribute. Finding 4 is not fully supported by the experiments.
+
+Presentation:
+
+The paper is hard to follow. Many descriptions are vague. For example, Lines 186-187 indicate that some existing heuristics would fail on the example in Listing 1 but it is still unclear why it would fail. Although more details are discussed later in Section 4, such vague descriptions make the lines difficult to understand. Thereby, the paragraph cannot well motivate the work.
+Besides, the authors dive into the implementation details quickly after the introduction (starting from Section 2), which make the readers without experiences using Soot or Doop confused. I would suggest making a high-level, implementation agnostic presentation of the detection algorithm before talking about the actual implementation.
+
+There are other presentation issues in this paper. For example, the title in HotCRP is different from the title in the submitted paper. The authors may double check the contents.
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+Review #1269B
+===========================================================================
+
+Overall merit
+-------------
+2. Weak reject
+
+Paper summary
+-------------
+This paper proposes MockDetector, a technique to identify mock objects created in unit tests.
+The paper covers a motivating example (section 2) as well as a survey of possible applications (section 3), of which finding focal methods is elaborated (seciton 4).
+The paper discusses two implementations (in Soot and Doop) as well as design considerations (section 5). An evaluation on 8 systems shows that up to half of the test methods uses mocks, up to 16% of the methods calls are on mocks, and that interprocedural analysis finds up to 34x more mock invocations.
+
+Strengths
+---------
+- potentially relevant topic with potentially interesting applications
+- easy to read
+
+Weaknesses
+----------
+- Speculation of potential applications, but no hard data about actually interesting ones.
+- Replication package not (yet?) available
+- Core technique seems fairly straightforward
+
+Comments for authors
+--------------------
+Let me start by saying that I very much like the idea of working on a mock detector, and that I appreciate the author's recognition of its importance.
+
+Having said that, I doubt whether the present paper is suitable as a full research paper. Without loss of content it might fit in a 4 page tool demo paper.
+
+My main problem with this paper is that the actual content is fairly limited: The paper describes an imperative Sooth and a declarative Doop implementation of a mock detector (sections 5.1 and 5.2, which both seem fairly straightforward) and some counts resulting from applying these to eight open source systems (section 6.1). The rest of the paper is mostly speculation about potential applications.
+
+Section 6.2 fails to convince me. Yes, if one omits tests, coverage goes down. But a very simple lexical analysis just checking the occurence of the word "mock" in a test case will also identify a set of test cases, which, when we omit them, may yield similar reductions. Both numbers will be similar, but why would one be better / more useful than the other? In other words, the paper does not make a strong enough case that section 6.2 matters.
+
+I am puzzled by section 4. It would be nice if the paper had hard results here, but as it stands it mostly contains speculation (reasonable, yes, but hard to verify for a reader) about the impact on focal method detection.
+
+Likewise with section 3: I would have been more convinced if MockDetector had actually been applied in one of the surveyed applications, so that an assessment of its actual impact could have been given, supported by actual data.
+
+The evaluation does not formulate research questions. There are performance numbers, but the "Findings" are not about performance. The findings are highly quantitive, reporting essentially just counts. They do not seem to answer a more interesting, high level research question.
+
+The abstract is on the long side.
+
+Did I miss the replication package?
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+Review #1269C
+===========================================================================
+
+Overall merit
+-------------
+2. Weak reject
+
+Paper summary
+-------------
+The paper presents an investigation into detecting mock objects created in unit tests. The paper provides two solutions to identifying mock objects and corresponding method invocations. The first solution is a declarative analysis built on top of Doop. The second solution is an imperative analysis built on top of Soot. The paper discusses some applications of the analyses. The paper also provides an evaluation of the analyses. The evaluation is based on eight open-source benchmarks and a micro-benchmark.
+
+Strengths
+---------
+- The paper's topic is of interest to the software engineering community.
+- An easy-to-use framework that identifies method invocations of mock objects could be helpful for developers.
+
+Weaknesses
+----------
+- The evaluation of the approach should be improved.
+- The approach has some limitations that were not discussed.
+
+Comments for authors
+--------------------
+Overall, I believe that that paper focuses on an interesting topic and it provides well-constructed solutions to the problem being targeted. However, I believe that the paper did not suitably evaluate the solutions, which makes it unclear whether a static approach for the problem being targeted is actually necessary. I provide comments for improvement in the rest of my review.
+
+##### Evaluation
+The main issue I see in the evaluation of the proposed solutions is that no ground truth for all the benchmarks was provided (i.e., no precision nor recall was provided). Without that information, it is not possible to fully assess the effectiveness of the proposed solutions. I understand that a manual analysis was performed on some of the benchmarks, but I find that to be insufficient. I also believe that having such information could remove some doubts on whether using a static approach for this problem is actually the way to go. It is possible to use/extend Mockito to retrieve method invocations on mock objects (and their stubbing locations) and have the same information as the one provided by the solutions in the paper. Such an approach would have limited to no problems with precision or "soundness" and should be used as a baseline to evaluate the static solutions proposed in the paper. I also understand that the proposed solutions can target different frameworks, but considering that Mockito is the most widely used framework (by a large margin), I find that focusing only on Mockito would not be an issue. Additional items to improve in the evaluation are:
+- The paper should clearly state what the research questions are.
+- The paper should describe the benchmark selection process.
+- The paper does not provide enough evidence for the claims in Section 6.2 and I suggest presenting such claims as a case study (i.e., they have very limited generalizability).
+- The paper has some threats to validity that are not discussed. I suggest adding a section for that.
+
+##### Approach
+The approach does not discuss how it handles invocations on objects created with the Mockito.spy construct. Based on the description I found in the paper, I believe that this construct is not handled and that is problematic. Specifically, objects created with Mockito.spy invoke the original methods and those methods could be focal methods. The solutions should specifically track stubbed methods and only mark such invocations as invocations on a mock object. I suggest adding support for that construct. Additionally, always in relation to the approach, can the solutions handle inherited @Before methods? The paper should clarify this aspect as well.
+
+
+##### Other comments
+The paper is well written and I only have a few suggestions for improving its presentation:
+- Line 443 goes out of bounds.
+- In Table 1, I suggest using a comma to format numbers above 1,000 as it makes it easier to read the numbers
+- I felt that it was premature to show the declarative analysis in Section 2. That part of the paper could be removed.
+- The example on mock objects and focal methods (line 356) makes speculations on Ghafari's algorithm and methods2test. I would like to see in the paper whether the speculations are from the description of the approaches or whether the corresponding tools were actually run.
+- At line 403, the paper mentions that "Sometimes, their tool automatically reports a focal method that is actually a mock invocation from the developer’s standpoint". The paper should clearly report how many times that happens.
+
+
+Comment @A1 by Reviewer B
+---------------------------------------------------------------------------
+Meta-review: The reviewers briefly discussed their impressions. They appreciate the topic and recognize its potential importance. The present paper however suffers from problems concerning the evaluation, in particular that potential applications are discussed, but not implemented and actually evaluated.
+
+
+
